@@ -22,3 +22,5 @@ _deps
 
 # Build files
 build/
+cmake-build-debug/
+.cache
