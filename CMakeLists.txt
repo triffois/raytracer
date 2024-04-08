@@ -32,6 +32,7 @@ add_subdirectory(${GLFW_DIR})
 add_subdirectory(${GLAD_DIR})
 
 target_include_directories(${PROJECT_NAME} 
+    PRIVATE include
 	PUBLIC ${GLFW_DIR}/include
     PUBLIC ${GLAD_DIR}/include
     PUBLIC ${TINYGLTF_DIR}
