@@ -12,8 +12,8 @@
 #include <iostream>
 #include <string>
 
-#include "./load_model.hpp"
 #include "./aabb.hpp"
+#include "./load_model.hpp"
 #include "./use_opengl.h"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -60,28 +60,23 @@ int main(int argc, char *argv[]) {
                          new_triangles.end());
     }
 
-#define DEBUG_PRINT
+// #define DEBUG_PRINT
 #ifdef DEBUG_PRINT
     std::cout << "[" << std::endl;
     for (auto &t : triangles) {
-        std::cout << "  [";
-        std::cout << "[";
-        std::cout << t.v1.x << ", " << t.v1.y << ", " << t.v1.z;
-        std::cout << "],";
-        std::cout << "[";
-        std::cout << t.v2.x << ", " << t.v2.y << ", " << t.v2.z;
-        std::cout << "],";
-        std::cout << "[";
-        std::cout << t.v3.x << ", " << t.v3.y << ", " << t.v3.z;
-        std::cout << "]";
-        std::cout << "]," << std::endl;
+        std::cout << "  ";
+        Triangle triangle =
+            Triangle{Vec3{t.v1.x, t.v1.y, t.v1.z}, Vec3{t.v2.x, t.v2.y, t.v2.z},
+                     Vec3{t.v3.x, t.v3.y, t.v3.z}};
+        print_triangle(triangle);
     }
     std::cout << "]" << std::endl;
 #endif
 
-    Box *box = triangles_to_aabb(triangles, 0, triangles.size(), 'x');
+    std::vector<Box> boxes;
+    AABB *aabb = triangles_to_aabb(boxes, triangles, 0, triangles.size(), 0);
 #ifdef DEBUG_PRINT
-    print_aabb(box, 0, triangles);
+    print_box(boxes, aabb->root_id, 0, triangles);
 #endif
 
     // glfw: initialize and configure
@@ -201,6 +196,13 @@ int main(int argc, char *argv[]) {
                  triangles.size() * sizeof(TriangleForGLSL), triangles.data(),
                  GL_DYNAMIC_COPY);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_triangles);
+    GLuint ssbo_boxes;
+    glGenBuffers(1, &ssbo_boxes);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_boxes);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, boxes.size() * sizeof(Box),
+                 boxes.data(), GL_DYNAMIC_COPY);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_boxes);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     while (!glfwWindowShouldClose(window)) {
         // input
         // -----
@@ -240,10 +242,26 @@ int main(int argc, char *argv[]) {
         glUniform1f(timeLocation, time_value);
         int frame_location = glGetUniformLocation(shader_program, "iFrame");
         glUniform1i(frame_location, frame++);
-        int triangle_count = glGetUniformLocation(shader_program, "triangle_count");
-        glUniform1i(triangle_count, triangles.size());
+        int triangle_count_location =
+            glGetUniformLocation(shader_program, "triangle_count");
+        glUniform1i(triangle_count_location, triangles.size());
+
+        // AABB
+        int max_x_location = glGetUniformLocation(shader_program, "max_x");
+        glUniform1i(max_x_location, aabb->max_x);
+        int min_x_location = glGetUniformLocation(shader_program, "min_x");
+        glUniform1i(min_x_location, aabb->min_x);
+        int max_y_location = glGetUniformLocation(shader_program, "max_y");
+        glUniform1i(max_y_location, aabb->max_y);
+        int min_y_location = glGetUniformLocation(shader_program, "min_y");
+        glUniform1i(min_y_location, aabb->min_y);
+        int max_z_location = glGetUniformLocation(shader_program, "max_z");
+        glUniform1i(max_z_location, aabb->max_z);
+        int min_z_location = glGetUniformLocation(shader_program, "min_z");
+        glUniform1i(min_z_location, aabb->min_z);
+        int root_id_location = glGetUniformLocation(shader_program, "root_id");
+        glUniform1i(root_id_location, aabb->root_id);
     }
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------

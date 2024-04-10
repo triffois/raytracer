@@ -30,8 +30,6 @@ struct Triangle {
     Vec3 v1;
     Vec3 v2;
     Vec3 v3;
-    Vec3 min;
-    Vec3 max;
 };
 
 struct Vec3ForGLSL {

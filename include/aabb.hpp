@@ -3,25 +3,42 @@
 #include <vector>
 
 struct Box {
-    Box(float min, float max, Box *left, Box *right, size_t start, size_t end,
-        char coord)
-        : min(min), max(max), left(left), right(right), start(start), end(end),
-          coord(coord) {}
+    Box(float min, float max, int left_id, int right_id, int start,
+        int end, int coord)
+        : min(min), max(max), left_id(left_id), right_id(right_id),
+          start(start), end(end), coord(coord) {}
     float min;
     float max;
-    Box *left;
-    Box *right;
-    size_t start;
-    size_t end;
-    char coord;
+    int left_id;
+    int right_id;
+    int start;
+    int end;
+    int coord;
 };
 
-char get_next_coord(char coord);
+struct AABB {
+    float max_x;
+    float min_x;
+    float max_y;
+    float min_y;
+    float max_z;
+    float min_z;
+    int root_id;
+};
 
-float get_coord(char coord, const Vec3ForGLSL &v);
+void print_triangle(const Triangle &t);
 
-Box *triangles_to_aabb(std::vector<TriangleForGLSL> &triangles, size_t start,
-                       size_t end, char coord);
+int get_next_coord(int coord);
 
-void print_aabb(Box *box, size_t depth,
-                std::vector<TriangleForGLSL> &triangles);
+float get_coord(int coord, const Vec3ForGLSL &v);
+
+Box triangles_to_box(std::vector<Box> &boxes,
+                     std::vector<TriangleForGLSL> &triangles, int start,
+                     int end, int coord);
+
+AABB *triangles_to_aabb(std::vector<Box> &boxes,
+                        std::vector<TriangleForGLSL> &triangles, int start,
+                        int end, int coord);
+
+void print_box(std::vector<Box> boxes, int box_id, size_t depth,
+               std::vector<TriangleForGLSL> &triangles);

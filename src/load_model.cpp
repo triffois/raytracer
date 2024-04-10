@@ -121,13 +121,24 @@ Matrix4 compose_matrix(const Vec3 &translation, const Vec4 &rotation,
     return matrix;
 }
 
+void print_triangle(const Triangle &t) {
+    std::cout << "[";
+    std::cout << "[";
+    std::cout << t.v1.x << ", " << t.v1.y << ", " << t.v1.z;
+    std::cout << "],";
+    std::cout << "[";
+    std::cout << t.v2.x << ", " << t.v2.y << ", " << t.v2.z;
+    std::cout << "],";
+    std::cout << "[";
+    std::cout << t.v3.x << ", " << t.v3.y << ", " << t.v3.z;
+    std::cout << "]";
+    std::cout << "]," << std::endl;
+}
+
 void print_json_node(const OurNode &node) {
     for (const auto &primitive : node.primitives) {
-        std::cout << "    [[" << primitive.v1.x << ", " << primitive.v1.y
-                  << ", " << primitive.v1.z << "], [" << primitive.v2.x << ", "
-                  << primitive.v2.y << ", " << primitive.v2.z << "], ["
-                  << primitive.v3.x << ", " << primitive.v3.y << ", "
-                  << primitive.v3.z << "]]," << std::endl;
+        std::cout << "    ";
+        print_triangle(primitive);
     }
     for (const auto &child : node.children) {
         print_json_node(child);
@@ -149,12 +160,8 @@ void print_node(const OurNode &node, size_t depth) {
               << ", " << node.scale.z << ")" << std::endl;
     std::cout << indent << "  Primitives:" << std::endl;
     for (const auto &primitive : node.primitives) {
-        std::cout << indent << "    [[" << primitive.v1.x << ", "
-                  << primitive.v1.y << ", " << primitive.v1.z << "], ["
-                  << primitive.v2.x << ", " << primitive.v2.y << ", "
-                  << primitive.v2.z << "], [" << primitive.v3.x << ", "
-                  << primitive.v3.y << ", " << primitive.v3.z << "]],"
-                  << std::endl;
+        std::cout << indent << "    ";
+        print_triangle(primitive);
     }
     std::cout << indent << "  Children:" << std::endl;
     for (const auto &child : node.children) {
@@ -274,13 +281,8 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                     Vec3 v1 = make_vec3(&positions[index_buffer[i] * 3]);
                     Vec3 v2 = make_vec3(&positions[index_buffer[i + 1] * 3]);
                     Vec3 v3 = make_vec3(&positions[index_buffer[i + 2] * 3]);
-                    Vec3 minv = Vec3{std::min(std::min(v1.x, v2.x), v3.x),
-                                     std::min(std::min(v1.y, v2.y), v3.y),
-                                     std::min(std::min(v1.z, v2.z), v3.z)};
-                    Vec3 maxv = Vec3{std::max(std::max(v1.x, v2.x), v3.x),
-                                     std::max(std::max(v1.y, v2.y), v3.y),
-                                     std::max(std::max(v1.z, v2.z), v3.z)};
-                    primitives->push_back(Triangle{v1, v2, v3, minv, maxv});
+                    Triangle triangle{v1, v2, v3};
+                    primitives->push_back(triangle);
                 }
             }
         }
@@ -385,8 +387,20 @@ std::vector<TriangleForGLSL> node_to_triangles(const OurNode &node) {
         Vec3ForGLSL v1_transformed = transform4(node.matrix, primitive.v1);
         Vec3ForGLSL v2_transformed = transform4(node.matrix, primitive.v2);
         Vec3ForGLSL v3_transformed = transform4(node.matrix, primitive.v3);
-        Vec3ForGLSL min_transformed = transform4(node.matrix, primitive.min);
-        Vec3ForGLSL max_transformed = transform4(node.matrix, primitive.max);
+        Vec3ForGLSL min_transformed =
+            Vec3ForGLSL{std::min(v1_transformed.x,
+                                 std::min(v2_transformed.x, v3_transformed.x)),
+                        std::min(v1_transformed.y,
+                                 std::min(v2_transformed.y, v3_transformed.y)),
+                        std::min(v1_transformed.z,
+                                 std::min(v2_transformed.z, v3_transformed.z))};
+        Vec3ForGLSL max_transformed =
+            Vec3ForGLSL{std::max(v1_transformed.x,
+                                 std::max(v2_transformed.x, v3_transformed.x)),
+                        std::max(v1_transformed.y,
+                                 std::max(v2_transformed.y, v3_transformed.y)),
+                        std::max(v1_transformed.z,
+                                 std::max(v2_transformed.z, v3_transformed.z))};
         triangles.push_back(TriangleForGLSL{v1_transformed, v2_transformed,
                                             v3_transformed, min_transformed,
                                             max_transformed});
