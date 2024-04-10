@@ -13,6 +13,7 @@
 #include <string>
 
 #include "./load_model.hpp"
+#include "./aabb.hpp"
 #include "./use_opengl.h"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -59,6 +60,7 @@ int main(int argc, char *argv[]) {
                          new_triangles.end());
     }
 
+#define DEBUG_PRINT
 #ifdef DEBUG_PRINT
     std::cout << "[" << std::endl;
     for (auto &t : triangles) {
@@ -75,6 +77,11 @@ int main(int argc, char *argv[]) {
         std::cout << "]," << std::endl;
     }
     std::cout << "]" << std::endl;
+#endif
+
+    Box *box = triangles_to_aabb(triangles, 0, triangles.size(), 'x');
+#ifdef DEBUG_PRINT
+    print_aabb(box, 0, triangles);
 #endif
 
     // glfw: initialize and configure
