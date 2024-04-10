@@ -1,9 +1,19 @@
 #version 430 core
 out vec4 FragColor;
+in vec4 gl_FragCoord;
+
 uniform vec2 iResolution;
 uniform float iTime;
 uniform int iFrame;
-in vec4 gl_FragCoord;
+uniform int triangle_count;
+// AABB
+uniform float max_x;
+uniform float min_x;
+uniform float max_y;
+uniform float min_y;
+uniform float max_z;
+uniform float min_z;
+uniform int root_id;
 
 struct Triangle {
     vec4 v1;
@@ -13,8 +23,22 @@ struct Triangle {
     vec4 max;
 };
 
+struct Box {
+    float min;
+    float max;
+    int left_id;
+    int right_id;
+    int start;
+    int end;
+    int coord;
+};
+
 layout(std430, binding = 3) buffer triangles_ssbo {
     Triangle triangles[];
+};
+
+layout(std430, binding = 4) buffer boxes_ssbo {
+    Box boxes[];
 };
 
 struct Sphere {
