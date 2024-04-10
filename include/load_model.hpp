@@ -13,10 +13,10 @@ struct Vec3 {
 };
 
 struct Vec4 {
-    double x1;
-    double x2;
-    double x3;
-    double x4;
+    double x;
+    double y;
+    double z;
+    double w;
 };
 
 struct Matrix4 {
@@ -33,6 +33,22 @@ struct Triangle {
     Vec3 min;
     Vec3 max;
 };
+
+struct Vec3ForGLSL {
+    float x;
+    float y;
+    float z;
+    float padding;
+};
+
+struct TriangleForGLSL {
+    Vec3ForGLSL v1;
+    Vec3ForGLSL v2;
+    Vec3ForGLSL v3;
+    Vec3ForGLSL min;
+    Vec3ForGLSL max;
+};
+
 
 struct OurNode {
     Vec3 translation;
@@ -53,6 +69,9 @@ Vec4 make_vec4(const Vec3 &vec, double w);
 
 Matrix4 make_matrix4(const std::vector<double> &vec);
 
+Matrix4 compose_matrix(const Vec3 &translation, const Vec4 &rotation,
+                       const Vec3 &scale);
+
 void print_json_node(const OurNode &node);
 
 void print_node(const OurNode &node, size_t depth = 0);
@@ -63,5 +82,7 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                std::vector<Vec3> &vertex_buffer, float global_scale);
 
 OurNode load_model(std::string filename);
+
+std::vector<TriangleForGLSL> node_to_triangles(const OurNode &node);
 
 #endif // INCLUDE_LOAD_MODEL_HPP_

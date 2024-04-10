@@ -1,6 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java:
 // http://www.viva64.com
+#include <ostream>
 #include <vector>
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -11,8 +12,8 @@
 #include <iostream>
 #include <string>
 
-#include "./use_opengl.h"
 #include "./load_model.hpp"
+#include "./use_opengl.h"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void process_input(GLFWwindow *window);
@@ -39,6 +40,7 @@ const char *read_shader(std::string filename) {
 }
 
 int main(int argc, char *argv[]) {
+
     if (argc < 2) {
         std::cout << "Usage: " << argv[0]
                   << " <shader file> [<gltf_file>...] [<glb_file>...]"
@@ -46,13 +48,37 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     std::string shader_path = argv[1];
-    std::vector<OurNode> models;
+    std::vector<TriangleForGLSL> triangles;
+    triangles.push_back(
+        TriangleForGLSL{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {1, 1, 1}, {0, 0, 0}});
     for (int i = 2; i < argc; ++i) {
         std::string path = argv[i];
         OurNode model = load_model(path);
-        models.push_back(model);
-        print_node(model);
+        std::vector<TriangleForGLSL> new_triangles = node_to_triangles(model);
+        triangles.reserve(triangles.size() +
+                          distance(new_triangles.begin(), new_triangles.end()));
+        triangles.insert(triangles.end(), new_triangles.begin(),
+                         new_triangles.end());
     }
+
+#define DEBUG_PRINT
+#ifdef DEBUG_PRINT
+    std::cout << "[" << std::endl;
+    for (auto &t : triangles) {
+        std::cout << "  [";
+        std::cout << "[";
+        std::cout << t.v1.x << ", " << t.v1.y << ", " << t.v1.z;
+        std::cout << "],";
+        std::cout << "[";
+        std::cout << t.v2.x << ", " << t.v2.y << ", " << t.v2.z;
+        std::cout << "],";
+        std::cout << "[";
+        std::cout << t.v3.x << ", " << t.v3.y << ", " << t.v3.z;
+        std::cout << "]";
+        std::cout << "]," << std::endl;
+    }
+    std::cout << "]" << std::endl;
+#endif
 
     // glfw: initialize and configure
     // ------------------------------
@@ -162,6 +188,15 @@ int main(int argc, char *argv[]) {
     // render loop
     // -----------
     int frame = 0;
+    // SSBO for vectors
+    // triangles
+    GLuint ssbo_triangles;
+    glGenBuffers(1, &ssbo_triangles);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_triangles);
+    glBufferData(GL_SHADER_STORAGE_BUFFER,
+                 triangles.size() * sizeof(TriangleForGLSL), triangles.data(),
+                 GL_DYNAMIC_COPY);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_triangles);
     while (!glfwWindowShouldClose(window)) {
         // input
         // -----
@@ -201,9 +236,8 @@ int main(int argc, char *argv[]) {
         glUniform1f(timeLocation, time_value);
         int frame_location = glGetUniformLocation(shader_program, "iFrame");
         glUniform1i(frame_location, frame++);
-
-        glUseProgram(shader_program);
     }
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------

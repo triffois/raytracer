@@ -1,5 +1,6 @@
 #include "./load_model.hpp"
 #include "./tiny_gltf.h"
+#include <cmath>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -27,6 +28,50 @@ Matrix4 make_matrix4(const std::vector<double> &vec) {
     return matrix;
 }
 
+Matrix4 compose_matrix(const Vec3 &translation, const Vec4 &rotation,
+                       const Vec3 &scale) {
+    Matrix4 matrix;
+
+    // Quaternion to rotation matrix
+    double qx = rotation.x, qy = rotation.y, qz = rotation.z, qw = rotation.w;
+    double qx2 = qx * qx, qy2 = qy * qy, qz2 = qz * qz;
+    double qxqy = qx * qy, qxqz = qx * qz, qxqw = qx * qw;
+    double qyqz = qy * qz, qyqw = qy * qw, qzqw = qz * qw;
+
+    matrix.v1.x = 1.0 - 2.0 * (qy2 + qz2);
+    matrix.v1.y = 2.0 * (qxqy + qzqw);
+    matrix.v1.z = 2.0 * (qxqz - qyqw);
+    matrix.v1.w = 0.0;
+
+    matrix.v2.x = 2.0 * (qxqy - qzqw);
+    matrix.v2.y = 1.0 - 2.0 * (qx2 + qz2);
+    matrix.v2.z = 2.0 * (qyqz + qxqw);
+    matrix.v2.w = 0.0;
+
+    matrix.v3.x = 2.0 * (qxqz + qyqw);
+    matrix.v3.y = 2.0 * (qyqz - qxqw);
+    matrix.v3.z = 1.0 - 2.0 * (qx2 + qy2);
+    matrix.v3.w = 0.0;
+
+    matrix.v4.x = translation.x;
+    matrix.v4.y = translation.y;
+    matrix.v4.z = translation.z;
+    matrix.v4.w = 1.0;
+
+    // Apply scale
+    matrix.v1.x *= scale.x;
+    matrix.v1.y *= scale.x;
+    matrix.v1.z *= scale.x;
+    matrix.v2.x *= scale.y;
+    matrix.v2.y *= scale.y;
+    matrix.v2.z *= scale.y;
+    matrix.v3.x *= scale.z;
+    matrix.v3.y *= scale.z;
+    matrix.v3.z *= scale.z;
+
+    return matrix;
+}
+
 void print_json_node(const OurNode &node) {
     for (const auto &primitive : node.primitives) {
         std::cout << "    [[" << primitive.v1.x << ", " << primitive.v1.y
@@ -48,9 +93,9 @@ void print_node(const OurNode &node, size_t depth) {
     std::cout << indent << "Node at (" << node.translation.x << ", "
               << node.translation.y << ", " << node.translation.z << ")"
               << std::endl;
-    std::cout << indent << "  Rotation: (" << node.rotation.x1 << ", "
-              << node.rotation.x2 << ", " << node.rotation.x3 << ", "
-              << node.rotation.x4 << ")" << std::endl;
+    std::cout << indent << "  Rotation: (" << node.rotation.x << ", "
+              << node.rotation.y << ", " << node.rotation.z << ", "
+              << node.rotation.w << ")" << std::endl;
     std::cout << indent << "  Scale: (" << node.scale.x << ", " << node.scale.y
               << ", " << node.scale.z << ")" << std::endl;
     std::cout << indent << "  Primitives:" << std::endl;
@@ -91,10 +136,8 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
     new_node.scale = scale;
     if (node.matrix.size() == 16) {
         new_node.matrix = make_matrix4(node.matrix);
-        if (global_scale != 1.0F) {
-            // newNode->matrix = glm::scale(newNode->matrix,
-            // glm::vec3(globalscale));
-        }
+    } else {
+        new_node.matrix = compose_matrix(translation, new_node.rotation, scale);
     }
 
     // Node with children
@@ -178,7 +221,7 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                 const float *positions = reinterpret_cast<const float *>(
                     &buffer.data[buffer_view.byteOffset + accessor.byteOffset]);
                 // print indexBuffer
-                for (size_t i = 0; i < index_buffer.size(); i += 3) {
+                for (size_t i = 0; i < index_count; i += 3) {
                     Vec3 v1 = make_vec3(&positions[index_buffer[i] * 3]);
                     Vec3 v2 = make_vec3(&positions[index_buffer[i + 1] * 3]);
                     Vec3 v3 = make_vec3(&positions[index_buffer[i + 2] * 3]);
@@ -229,21 +272,90 @@ OurNode load_model(std::string filename) {
     std::vector<Vec3> vertex_buffer;
     float scale = 1.0f;
 
-    OurNode rootNode{};
-    rootNode.translation = Vec3{0.0f, 0.0f, 0.0f};
-    rootNode.scale = Vec3{1.0f, 1.0f, 1.0f};
+    OurNode root_node{};
+    root_node.translation = Vec3{0.0f, 0.0f, 0.0f};
+    root_node.scale = Vec3{1.0f, 1.0f, 1.0f};
+    root_node.rotation = Vec4{0.0f, 0.0f, 0.0f, 1.0f};
+    root_node.matrix = compose_matrix(root_node.translation, root_node.rotation,
+                                      root_node.scale);
 
     for (const auto &node_idx : scene.nodes) {
         const tinygltf::Node node = gltf_model.nodes[node_idx];
-        load_node(&rootNode, node, node_idx, gltf_model, index_buffer,
+        load_node(&root_node, node, node_idx, gltf_model, index_buffer,
                   vertex_buffer, scale);
     }
 
 #ifdef DEBUG_PRINT
     std::cout << "[" << std::endl;
-    printNode(rootNode, 0);
+    print_node(rootNode);
     std::cout << "]" << std::endl;
 #endif
 
-    return rootNode;
+    return root_node;
+}
+
+Vec3 add_vec3(const Vec3 &vec1, const Vec3 &vec2) {
+    return Vec3{vec1.x + vec2.x, vec1.y + vec2.y, vec1.z + vec2.z};
+}
+
+Vec3ForGLSL transform4(const Matrix4 &matrix, const Vec3 &vector3) {
+    Vec4 result = {};
+    Vec4 vector = Vec4{vector3.x, vector3.y, vector3.z, 1.0f};
+    result.x = matrix.v1.x * vector.x + matrix.v1.y * vector.y +
+               matrix.v1.z * vector.z + matrix.v1.w * vector.w;
+    result.y = matrix.v2.x * vector.x + matrix.v2.y * vector.y +
+               matrix.v2.z * vector.z + matrix.v2.w * vector.w;
+    result.z = matrix.v3.x * vector.x + matrix.v3.y * vector.y +
+               matrix.v3.z * vector.z + matrix.v3.w * vector.w;
+    result.w = matrix.v4.x * vector.x + matrix.v4.y * vector.y +
+               matrix.v4.z * vector.z + matrix.v4.w * vector.w;
+    return Vec3ForGLSL{static_cast<float>(result.x),
+                       static_cast<float>(result.y),
+                       static_cast<float>(result.z)};
+}
+
+Vec3ForGLSL transform4(const Matrix4 &matrix, const Vec3ForGLSL &vector3) {
+    Vec4 result = {};
+    Vec4 vector = Vec4{vector3.x, vector3.y, vector3.z, 1.0f};
+    result.x = matrix.v1.x * vector.x + matrix.v1.y * vector.y +
+               matrix.v1.z * vector.z + matrix.v1.w * vector.w;
+    result.y = matrix.v2.x * vector.x + matrix.v2.y * vector.y +
+               matrix.v2.z * vector.z + matrix.v2.w * vector.w;
+    result.z = matrix.v3.x * vector.x + matrix.v3.y * vector.y +
+               matrix.v3.z * vector.z + matrix.v3.w * vector.w;
+    result.w = matrix.v4.x * vector.x + matrix.v4.y * vector.y +
+               matrix.v4.z * vector.z + matrix.v4.w * vector.w;
+    return Vec3ForGLSL{static_cast<float>(result.x),
+                       static_cast<float>(result.y),
+                       static_cast<float>(result.z)};
+}
+
+std::vector<TriangleForGLSL> node_to_triangles(const OurNode &node) {
+    std::vector<TriangleForGLSL> triangles = {};
+    for (const auto &primitive : node.primitives) {
+        Vec3ForGLSL v1_transformed = transform4(node.matrix, primitive.v1);
+        Vec3ForGLSL v2_transformed = transform4(node.matrix, primitive.v2);
+        Vec3ForGLSL v3_transformed = transform4(node.matrix, primitive.v3);
+        Vec3ForGLSL min_transformed = transform4(node.matrix, primitive.min);
+        Vec3ForGLSL max_transformed = transform4(node.matrix, primitive.max);
+        triangles.push_back(TriangleForGLSL{v1_transformed, v2_transformed,
+                                            v3_transformed, min_transformed,
+                                            max_transformed});
+    }
+    for (const auto &child : node.children) {
+        std::vector<TriangleForGLSL> new_triangles = node_to_triangles(child);
+        // print matrix
+        for (auto &triangle : new_triangles) {
+            triangle.v1 = transform4(node.matrix, triangle.v1);
+            triangle.v2 = transform4(node.matrix, triangle.v2);
+            triangle.v3 = transform4(node.matrix, triangle.v3);
+            triangle.min = transform4(node.matrix, triangle.min);
+            triangle.max = transform4(node.matrix, triangle.max);
+        }
+        triangles.reserve(triangles.size() +
+                          distance(new_triangles.begin(), new_triangles.end()));
+        triangles.insert(triangles.end(), new_triangles.begin(),
+                         new_triangles.end());
+    }
+    return triangles;
 }
