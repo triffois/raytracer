@@ -28,46 +28,95 @@ Matrix4 make_matrix4(const std::vector<double> &vec) {
     return matrix;
 }
 
+Matrix4 mul_matrixes(Matrix4 m1, Matrix4 m2) {
+    Matrix4 result{};
+    result.v1.x = m1.v1.x * m2.v1.x + m1.v1.y * m2.v2.x + m1.v1.z * m2.v3.x +
+                  m1.v1.w * m2.v4.x;
+    result.v1.y = m1.v1.x * m2.v1.y + m1.v1.y * m2.v2.y + m1.v1.z * m2.v3.y +
+                  m1.v1.w * m2.v4.y;
+    result.v1.z = m1.v1.x * m2.v1.z + m1.v1.y * m2.v2.z + m1.v1.z * m2.v3.z +
+                  m1.v1.w * m2.v4.z;
+    result.v1.w = m1.v1.x * m2.v1.w + m1.v1.y * m2.v2.w + m1.v1.z * m2.v3.w +
+                  m1.v1.w * m2.v4.w;
+
+    result.v2.x = m1.v2.x * m2.v1.x + m1.v2.y * m2.v2.x + m1.v2.z * m2.v3.x +
+                  m1.v2.w * m2.v4.x;
+    result.v2.y = m1.v2.x * m2.v1.y + m1.v2.y * m2.v2.y + m1.v2.z * m2.v3.y +
+                  m1.v2.w * m2.v4.y;
+    result.v2.z = m1.v2.x * m2.v1.z + m1.v2.y * m2.v2.z + m1.v2.z * m2.v3.z +
+                  m1.v2.w * m2.v4.z;
+    result.v2.w = m1.v2.x * m2.v1.w + m1.v2.y * m2.v2.w + m1.v2.z * m2.v3.w +
+                  m1.v2.w * m2.v4.w;
+
+    result.v3.x = m1.v3.x * m2.v1.x + m1.v3.y * m2.v2.x + m1.v3.z * m2.v3.x +
+                  m1.v3.w * m2.v4.x;
+    result.v3.y = m1.v3.x * m2.v1.y + m1.v3.y * m2.v2.y + m1.v3.z * m2.v3.y +
+                  m1.v3.w * m2.v4.y;
+    result.v3.z = m1.v3.x * m2.v1.z + m1.v3.y * m2.v2.z + m1.v3.z * m2.v3.z +
+                  m1.v3.w * m2.v4.z;
+    result.v3.w = m1.v3.x * m2.v1.w + m1.v3.y * m2.v2.w + m1.v3.z * m2.v3.w +
+                  m1.v3.w * m2.v4.w;
+
+    result.v4.x = m1.v4.x * m2.v1.x + m1.v4.y * m2.v2.x + m1.v4.z * m2.v3.x +
+                  m1.v4.w * m2.v4.x;
+    result.v4.y = m1.v4.x * m2.v1.y + m1.v4.y * m2.v2.y + m1.v4.z * m2.v3.y +
+                  m1.v4.w * m2.v4.y;
+    result.v4.z = m1.v4.x * m2.v1.z + m1.v4.y * m2.v2.z + m1.v4.z * m2.v3.z +
+                  m1.v4.w * m2.v4.z;
+    result.v4.w = m1.v4.x * m2.v1.w + m1.v4.y * m2.v2.w + m1.v4.z * m2.v3.w +
+                  m1.v4.w * m2.v4.w;
+
+    return result;
+}
+
 Matrix4 compose_matrix(const Vec3 &translation, const Vec4 &rotation,
                        const Vec3 &scale) {
     Matrix4 matrix;
 
+    // Translation matrix
+    matrix.v1 = {1.0, 0.0, 0.0, translation.x};
+    matrix.v2 = {0.0, 1.0, 0.0, translation.y};
+    matrix.v3 = {0.0, 0.0, 1.0, translation.z};
+    matrix.v4 = {0.0, 0.0, 0.0, 1.0};
+
+    // Scale matrix
+    Matrix4 scale_matrix;
+    scale_matrix.v1 = {scale.x, 0.0, 0.0, 0.0};
+    scale_matrix.v2 = {0.0, scale.y, 0.0, 0.0};
+    scale_matrix.v3 = {0.0, 0.0, scale.z, 0.0};
+    scale_matrix.v4 = {0.0, 0.0, 0.0, 1.0};
+
     // Quaternion to rotation matrix
-    double qx = rotation.x, qy = rotation.y, qz = rotation.z, qw = rotation.w;
-    double qx2 = qx * qx, qy2 = qy * qy, qz2 = qz * qz;
-    double qxqy = qx * qy, qxqz = qx * qz, qxqw = qx * qw;
-    double qyqz = qy * qz, qyqw = qy * qw, qzqw = qz * qw;
+    double q0 = rotation.w;
+    double q1 = rotation.x;
+    double q2 = rotation.y;
+    double q3 = rotation.z;
 
-    matrix.v1.x = 1.0 - 2.0 * (qy2 + qz2);
-    matrix.v1.y = 2.0 * (qxqy + qzqw);
-    matrix.v1.z = 2.0 * (qxqz - qyqw);
-    matrix.v1.w = 0.0;
+    // First row of the rotation matrix
+    double r00 = 2 * (q0 * q0 + q1 * q1) - 1;
+    double r01 = 2 * (q1 * q2 - q0 * q3);
+    double r02 = 2 * (q1 * q3 + q0 * q2);
 
-    matrix.v2.x = 2.0 * (qxqy - qzqw);
-    matrix.v2.y = 1.0 - 2.0 * (qx2 + qz2);
-    matrix.v2.z = 2.0 * (qyqz + qxqw);
-    matrix.v2.w = 0.0;
+    // Second row of the rotation matrix
+    double r10 = 2 * (q1 * q2 + q0 * q3);
+    double r11 = 2 * (q0 * q0 + q2 * q2) - 1;
+    double r12 = 2 * (q2 * q3 - q0 * q1);
 
-    matrix.v3.x = 2.0 * (qxqz + qyqw);
-    matrix.v3.y = 2.0 * (qyqz - qxqw);
-    matrix.v3.z = 1.0 - 2.0 * (qx2 + qy2);
-    matrix.v3.w = 0.0;
+    // Third row of the rotation matrix
+    double r20 = 2 * (q1 * q3 - q0 * q2);
+    double r21 = 2 * (q2 * q3 + q0 * q1);
+    double r22 = 2 * (q0 * q0 + q3 * q3) - 1;
 
-    matrix.v4.x = translation.x;
-    matrix.v4.y = translation.y;
-    matrix.v4.z = translation.z;
-    matrix.v4.w = 1.0;
+    // Create the rotation matrix
+    Matrix4 rot_matrix;
+    rot_matrix.v1 = {r00, r01, r02, 0.0};
+    rot_matrix.v2 = {r10, r11, r12, 0.0};
+    rot_matrix.v3 = {r20, r21, r22, 0.0};
+    rot_matrix.v4 = {0.0, 0.0, 0.0, 1.0};
 
-    // Apply scale
-    matrix.v1.x *= scale.x;
-    matrix.v1.y *= scale.x;
-    matrix.v1.z *= scale.x;
-    matrix.v2.x *= scale.y;
-    matrix.v2.y *= scale.y;
-    matrix.v2.z *= scale.y;
-    matrix.v3.x *= scale.z;
-    matrix.v3.y *= scale.z;
-    matrix.v3.z *= scale.z;
+    // Combine the matrices
+    matrix = mul_matrixes(matrix, rot_matrix);
+    matrix = mul_matrixes(matrix, scale_matrix);
 
     return matrix;
 }
@@ -273,9 +322,9 @@ OurNode load_model(std::string filename) {
     float scale = 1.0f;
 
     OurNode root_node{};
-    root_node.translation = Vec3{0.0f, 0.0f, 0.0f};
+    root_node.translation = Vec3{0.0f, 2.0f, -2.0f};
     root_node.scale = Vec3{1.0f, 1.0f, 1.0f};
-    root_node.rotation = Vec4{0.0f, 0.0f, 0.0f, 1.0f};
+    root_node.rotation = Vec4{0.0f, 0.22f, 0.8f, 0.0f};
     root_node.matrix = compose_matrix(root_node.translation, root_node.rotation,
                                       root_node.scale);
 
