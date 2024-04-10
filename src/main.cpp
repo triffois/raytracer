@@ -49,8 +49,6 @@ int main(int argc, char *argv[]) {
     }
     std::string shader_path = argv[1];
     std::vector<TriangleForGLSL> triangles;
-    triangles.push_back(
-        TriangleForGLSL{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {1, 1, 1}, {0, 0, 0}});
     for (int i = 2; i < argc; ++i) {
         std::string path = argv[i];
         OurNode model = load_model(path);
@@ -61,7 +59,6 @@ int main(int argc, char *argv[]) {
                          new_triangles.end());
     }
 
-#define DEBUG_PRINT
 #ifdef DEBUG_PRINT
     std::cout << "[" << std::endl;
     for (auto &t : triangles) {
