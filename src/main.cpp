@@ -233,6 +233,8 @@ int main(int argc, char *argv[]) {
         glUniform1f(timeLocation, time_value);
         int frame_location = glGetUniformLocation(shader_program, "iFrame");
         glUniform1i(frame_location, frame++);
+        int triangle_count = glGetUniformLocation(shader_program, "triangle_count");
+        glUniform1i(triangle_count, triangles.size());
     }
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
