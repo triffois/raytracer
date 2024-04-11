@@ -30,7 +30,7 @@ layout(std430, binding = 4) buffer boxes_ssbo { Box boxes[]; };
 
 const int MAX_BOUNCES = 4;
 const float FOCAL_LENGTH = 1.0;
-const int MAX_ARRAY_SIZE = 10;
+const int MAX_ARRAY_SIZE = 25;
 const float WEIGHT_THRESHOLD = 0.01;
 
 struct Ray {
@@ -143,7 +143,7 @@ Intersection intersectScene(Ray ray, Scene scene) {
       continue;
     }
 
-    if (box.left_id == -1) {
+    if (box.left_id == -1 || (stack_size + 1) >= MAX_ARRAY_SIZE) {
       // Iterate over triangles
       for (int i = box.start; i < box.end; i++) {
         Triangle triangle = triangles[i];
