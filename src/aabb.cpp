@@ -3,6 +3,31 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <limits>
+
+Vec3ForGLSL get_min(std::vector<TriangleForGLSL> triangles, int start, int end) {
+    Vec3ForGLSL min = Vec3ForGLSL{std::numeric_limits<float>::max(),
+                           std::numeric_limits<float>::max(),
+                           std::numeric_limits<float>::max()};
+    for (int i = start; i < end; i++) {
+        min = Vec3ForGLSL{std::min(min.x, triangles[i].min.x),
+                   std::min(min.y, triangles[i].min.y),
+                   std::min(min.z, triangles[i].min.z)};
+    }
+    return min;
+}
+
+Vec3ForGLSL get_max(std::vector<TriangleForGLSL> triangles, int start, int end) {
+    Vec3ForGLSL max = Vec3ForGLSL{-std::numeric_limits<float>::max(),
+                           -std::numeric_limits<float>::max(),
+                           -std::numeric_limits<float>::max()};
+    for (int i = start; i < end; i++) {
+        max = Vec3ForGLSL{std::max(max.x, triangles[i].max.x),
+                   std::max(max.y, triangles[i].max.y),
+                   std::max(max.z, triangles[i].max.z)};
+    }
+    return max;
+}
 
 int get_next_coord(int coord) { return (coord + 1) % 3; }
 
@@ -19,77 +44,45 @@ float get_coord(int coord, const Vec3ForGLSL &v) {
 Box triangles_to_box(std::vector<Box> &boxes,
                      std::vector<TriangleForGLSL> &triangles, int start,
                      int end, int coord) {
-    float min;
-    float max;
     int span = end - start;
     std::sort(triangles.begin() + start, triangles.begin() + end,
               [coord](const TriangleForGLSL &a, const TriangleForGLSL &b) {
                   return get_coord(coord, a.min) < get_coord(coord, b.min);
               });
-    min = get_coord(coord, triangles[start].min);
-    max = std::numeric_limits<float>::min();
-    for (int i = start; i < end; i++) {
-        max = std::max(max, get_coord(coord, triangles[i].max));
-    }
+
+    Vec3ForGLSL min = get_min(triangles, start, end);
+    Vec3ForGLSL max = get_max(triangles, start, end);
+
     if (span <= 8) {
-        return Box(min, max, -1, -1, start, end, coord);
+        return Box(min, max, -1, -1, start, end);
     }
+
     int mid = start + span / 2;
     boxes.push_back(
         triangles_to_box(boxes, triangles, start, mid, get_next_coord(coord)));
     int left = boxes.size() - 1;
     boxes.push_back(
         triangles_to_box(boxes, triangles, mid, end, get_next_coord(coord)));
-    return Box(min, max, left, left + 1, start, end, coord);
+    return Box(min, max, left, left + 1, start, end);
 }
 
 AABB *triangles_to_aabb(std::vector<Box> &boxes,
                         std::vector<TriangleForGLSL> &triangles, int start,
                         int end, int coord) {
-    float min;
-    float max;
     int span = end - start;
-    std::sort(triangles.begin() + start, triangles.begin() + end,
-              [coord](const TriangleForGLSL &a, const TriangleForGLSL &b) {
-                  return get_coord(coord, a.min) < get_coord(coord, b.min);
-              });
-    min = get_coord(coord, triangles[start].min);
-    max = std::numeric_limits<float>::min();
-    float min_y = std::numeric_limits<float>::max();
-    float max_y = std::numeric_limits<float>::min();
-    float min_z = std::numeric_limits<float>::max();
-    float max_z = std::numeric_limits<float>::min();
-    for (int i = start; i < end; i++) {
-        max = std::max(max, triangles[i].max.x);
-        max_y = std::max(max_y, triangles[i].max.y);
-        max_z = std::max(max_z, triangles[i].max.z);
-        min_y = std::min(min_y, triangles[i].min.y);
-        min_z = std::min(min_z, triangles[i].min.z);
-    }
+
+    Vec3ForGLSL min = get_min(triangles, start, end);
+    Vec3ForGLSL max = get_max(triangles, start, end);
+
     if (span <= 8) {
-        boxes.push_back(Box(min, max, -1, -1, start, end, coord));
+        boxes.push_back(Box(min, max, -1, -1, start, end));
         return new AABB{max,
                         min,
-                        max_y,
-                        min_y,
-                        max_z,
-                        min_z,
                         static_cast<int>(boxes.size() - 1)};
     }
-    int mid = start + span / 2;
-    boxes.push_back(
-        triangles_to_box(boxes, triangles, start, mid, get_next_coord(coord)));
-    int left = boxes.size() - 1;
-    int right = boxes.size();
-    boxes.push_back(
-        triangles_to_box(boxes, triangles, mid, end, get_next_coord(coord)));
-    boxes.push_back(Box(min, max, left, right, start, end, coord));
+    boxes.push_back(triangles_to_box(boxes, triangles, start, end, coord));
     return new AABB{max,
                     min,
-                    max_y,
-                    min_y,
-                    max_z,
-                    min_z,
                     static_cast<int>(boxes.size() - 1)};
 }
 
@@ -99,12 +92,15 @@ void print_box(std::vector<Box> boxes, int box_id, size_t depth,
         std::cout << "  ";
     }
     const Box *box = &boxes[box_id];
-    std::cout << "min: " << box->min << ", max: " << box->max
+    std::cout << "min x: " << box->min.x << ", y: " << box->min.y
+              << ", z: " << box->min.z << ", max x: " << box->max.x
+              << ", y: " << box->max.y << ", z: " << box->max.z
               << ", start: " << box->start << ", end: " << box->end
+              << ", right_id: " << box->right_id << ", left_id: " << box->left_id
               << std::endl;
     if (box->left_id != -1) {
-        print_box(boxes, box->left_id, depth + 1, triangles);
         print_box(boxes, box->right_id, depth + 1, triangles);
+        print_box(boxes, box->left_id, depth + 1, triangles);
         return;
     }
     // print triangles

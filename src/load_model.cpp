@@ -324,9 +324,9 @@ OurNode load_model(std::string filename) {
     float scale = 1.0f;
 
     OurNode root_node{};
-    root_node.translation = Vec3{0.0f, 2.0f, -2.0f};
+    root_node.translation = Vec3{0.0f, 0.0f, -0.0f};
     root_node.scale = Vec3{1.0f, 1.0f, 1.0f};
-    root_node.rotation = Vec4{0.0f, 0.22f, 0.8f, 0.0f};
+    root_node.rotation = Vec4{0.0f, 0.0f, 0.0f, 0.0f};
     root_node.matrix = compose_matrix(root_node.translation, root_node.rotation,
                                       root_node.scale);
 
@@ -381,26 +381,30 @@ Vec3ForGLSL transform4(const Matrix4 &matrix, const Vec3ForGLSL &vector3) {
                        static_cast<float>(result.z)};
 }
 
+Vec3ForGLSL v3_min(const Vec3ForGLSL &v1, const Vec3ForGLSL &v2,
+                   const Vec3ForGLSL &v3) {
+    return Vec3ForGLSL{std::min(v1.x, std::min(v2.x, v3.x)),
+                       std::min(v1.y, std::min(v2.y, v3.y)),
+                       std::min(v1.z, std::min(v2.z, v3.z))};
+}
+
+Vec3ForGLSL v3_max(const Vec3ForGLSL &v1, const Vec3ForGLSL &v2,
+                   const Vec3ForGLSL &v3) {
+    return Vec3ForGLSL{std::max(v1.x, std::max(v2.x, v3.x)),
+                       std::max(v1.y, std::max(v2.y, v3.y)),
+                       std::max(v1.z, std::max(v2.z, v3.z))};
+}
+
 std::vector<TriangleForGLSL> node_to_triangles(const OurNode &node) {
     std::vector<TriangleForGLSL> triangles = {};
     for (const auto &primitive : node.primitives) {
         Vec3ForGLSL v1_transformed = transform4(node.matrix, primitive.v1);
         Vec3ForGLSL v2_transformed = transform4(node.matrix, primitive.v2);
         Vec3ForGLSL v3_transformed = transform4(node.matrix, primitive.v3);
-        Vec3ForGLSL min_transformed =
-            Vec3ForGLSL{std::min(v1_transformed.x,
-                                 std::min(v2_transformed.x, v3_transformed.x)),
-                        std::min(v1_transformed.y,
-                                 std::min(v2_transformed.y, v3_transformed.y)),
-                        std::min(v1_transformed.z,
-                                 std::min(v2_transformed.z, v3_transformed.z))};
-        Vec3ForGLSL max_transformed =
-            Vec3ForGLSL{std::max(v1_transformed.x,
-                                 std::max(v2_transformed.x, v3_transformed.x)),
-                        std::max(v1_transformed.y,
-                                 std::max(v2_transformed.y, v3_transformed.y)),
-                        std::max(v1_transformed.z,
-                                 std::max(v2_transformed.z, v3_transformed.z))};
+        Vec3ForGLSL min_transformed = v3_min(v1_transformed, v2_transformed,
+                                             v3_transformed);
+        Vec3ForGLSL max_transformed = v3_max(v1_transformed, v2_transformed,
+                                             v3_transformed);
         triangles.push_back(TriangleForGLSL{v1_transformed, v2_transformed,
                                             v3_transformed, min_transformed,
                                             max_transformed});
@@ -412,8 +416,8 @@ std::vector<TriangleForGLSL> node_to_triangles(const OurNode &node) {
             triangle.v1 = transform4(node.matrix, triangle.v1);
             triangle.v2 = transform4(node.matrix, triangle.v2);
             triangle.v3 = transform4(node.matrix, triangle.v3);
-            triangle.min = transform4(node.matrix, triangle.min);
-            triangle.max = transform4(node.matrix, triangle.max);
+            triangle.min = v3_min(triangle.v1, triangle.v2, triangle.v3);
+            triangle.max = v3_max(triangle.v1, triangle.v2, triangle.v3);
         }
         triangles.reserve(triangles.size() +
                           distance(new_triangles.begin(), new_triangles.end()));

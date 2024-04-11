@@ -24,13 +24,12 @@ struct Triangle {
 };
 
 struct Box {
-    float min;
-    float max;
+    vec4 min;
+    vec4 max;
     int left_id;
     int right_id;
     int start;
     int end;
-    int coord;
 };
 
 layout(std430, binding = 3) buffer triangles_ssbo {

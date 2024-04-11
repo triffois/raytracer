@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
                          new_triangles.end());
     }
 
-// #define DEBUG_PRINT
+#define DEBUG_PRINT
 #ifdef DEBUG_PRINT
     std::cout << "[" << std::endl;
     for (auto &t : triangles) {
@@ -248,17 +248,17 @@ int main(int argc, char *argv[]) {
 
         // AABB
         int max_x_location = glGetUniformLocation(shader_program, "max_x");
-        glUniform1i(max_x_location, aabb->max_x);
+        glUniform1i(max_x_location, aabb->max.x);
         int min_x_location = glGetUniformLocation(shader_program, "min_x");
-        glUniform1i(min_x_location, aabb->min_x);
+        glUniform1i(min_x_location, aabb->min.x);
         int max_y_location = glGetUniformLocation(shader_program, "max_y");
-        glUniform1i(max_y_location, aabb->max_y);
+        glUniform1i(max_y_location, aabb->max.y);
         int min_y_location = glGetUniformLocation(shader_program, "min_y");
-        glUniform1i(min_y_location, aabb->min_y);
+        glUniform1i(min_y_location, aabb->min.y);
         int max_z_location = glGetUniformLocation(shader_program, "max_z");
-        glUniform1i(max_z_location, aabb->max_z);
+        glUniform1i(max_z_location, aabb->max.z);
         int min_z_location = glGetUniformLocation(shader_program, "min_z");
-        glUniform1i(min_z_location, aabb->min_z);
+        glUniform1i(min_z_location, aabb->min.z);
         int root_id_location = glGetUniformLocation(shader_program, "root_id");
         glUniform1i(root_id_location, aabb->root_id);
     }

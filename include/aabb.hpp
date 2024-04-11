@@ -3,26 +3,21 @@
 #include <vector>
 
 struct Box {
-    Box(float min, float max, int left_id, int right_id, int start,
-        int end, int coord)
+    Box(Vec3ForGLSL min, Vec3ForGLSL max, int left_id, int right_id, int start,
+        int end)
         : min(min), max(max), left_id(left_id), right_id(right_id),
-          start(start), end(end), coord(coord) {}
-    float min;
-    float max;
+          start(start), end(end) {}
+    Vec3ForGLSL min;
+    Vec3ForGLSL max;
     int left_id;
     int right_id;
     int start;
     int end;
-    int coord;
 };
 
 struct AABB {
-    float max_x;
-    float min_x;
-    float max_y;
-    float min_y;
-    float max_z;
-    float min_z;
+    Vec3ForGLSL max;
+    Vec3ForGLSL min;
     int root_id;
 };
 
