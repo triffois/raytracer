@@ -63,7 +63,8 @@ Box triangles_to_box(std::vector<Box> &boxes,
     int left = boxes.size() - 1;
     boxes.push_back(
         triangles_to_box(boxes, triangles, mid, end, get_next_coord(coord)));
-    return Box(min, max, left, left + 1, start, end);
+    int right = boxes.size() - 1;
+    return Box(min, max, left, right, start, end);
 }
 
 AABB *triangles_to_aabb(std::vector<Box> &boxes,
