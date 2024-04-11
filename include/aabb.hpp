@@ -16,8 +16,6 @@ struct Box {
 };
 
 struct AABB {
-    Vec3ForGLSL max;
-    Vec3ForGLSL min;
     int root_id;
 };
 

@@ -77,14 +77,10 @@ AABB *triangles_to_aabb(std::vector<Box> &boxes,
 
     if (span <= 8) {
         boxes.push_back(Box(min, max, -1, -1, start, end));
-        return new AABB{max,
-                        min,
-                        static_cast<int>(boxes.size() - 1)};
+        return new AABB{static_cast<int>(boxes.size() - 1)};
     }
     boxes.push_back(triangles_to_box(boxes, triangles, start, end, coord));
-    return new AABB{max,
-                    min,
-                    static_cast<int>(boxes.size() - 1)};
+    return new AABB{static_cast<int>(boxes.size() - 1)};
 }
 
 void print_box(std::vector<Box> boxes, int box_id, size_t depth,
