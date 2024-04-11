@@ -294,6 +294,7 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
 OurNode load_model(std::string filename) {
     tinygltf::Model gltf_model;
     tinygltf::TinyGLTF loader;
+    OurNode root_node{};
 
     std::string err;
     std::string warn;
@@ -301,9 +302,19 @@ OurNode load_model(std::string filename) {
     if (filename.substr(filename.size() - 4) != ".glb") {
         file_loaded =
             loader.LoadASCIIFromFile(&gltf_model, &err, &warn, filename);
+            if(gltf_model.images.size() == 0){
+            }else
+            for(auto &image : gltf_model.images){
+                root_node.images.push_back(image);
+            }
     } else {
         file_loaded =
             loader.LoadBinaryFromFile(&gltf_model, &err, &warn, filename);
+            if(gltf_model.images.size() == 0){
+            }else
+            for(auto &image : gltf_model.images){
+                root_node.images.push_back(image);
+            }
     }
     if (!warn.empty()) {
         printf("Warn: %s\n", warn.c_str());
@@ -323,7 +334,6 @@ OurNode load_model(std::string filename) {
     std::vector<Vec3> vertex_buffer;
     float scale = 1.0f;
 
-    OurNode root_node{};
     root_node.translation = Vec3{0.0f, 0.0f, -0.0f};
     root_node.scale = Vec3{1.0f, 1.0f, 1.0f};
     root_node.rotation = Vec4{0.0f, 0.0f, 0.0f, 0.0f};

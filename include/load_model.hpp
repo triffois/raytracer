@@ -55,6 +55,7 @@ struct OurNode {
     Matrix4 matrix;
     std::vector<OurNode> children;
     std::vector<Triangle> primitives;
+    std::vector<tinygltf::Image> images;
 };
 
 Vec3 make_vec3(const std::vector<double> &vec);

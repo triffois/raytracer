@@ -50,6 +50,7 @@ int main(int argc, char *argv[]) {
     }
     std::string shader_path = argv[1];
     std::vector<TriangleForGLSL> triangles;
+    std::vector<tinygltf::Image> textures;
     for (int i = 2; i < argc; ++i) {
         std::string path = argv[i];
         OurNode model = load_model(path);
@@ -58,6 +59,9 @@ int main(int argc, char *argv[]) {
                           distance(new_triangles.begin(), new_triangles.end()));
         triangles.insert(triangles.end(), new_triangles.begin(),
                          new_triangles.end());
+        for(int j = 0; j < model.images.size(); ++j) {
+            textures.push_back(model.images[j]);
+        }
     }
 
 #define DEBUG_PRINT
@@ -150,6 +154,16 @@ int main(int argc, char *argv[]) {
     }
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
+    
+     //configure textures
+    GLuint texture_data[textures.size()];
+    glGenTextures(textures.size(), texture_data);
+
+    for(int i = 0; i < textures.size(); ++i) {
+        glBindTexture(GL_TEXTURE_2D, texture_data[i]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textures[i].width, textures[i].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textures[i].image.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
