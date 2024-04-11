@@ -50,10 +50,9 @@ Box triangles_to_box(std::vector<Box> &boxes,
                   return get_coord(coord, a.min) < get_coord(coord, b.min);
               });
 
-    Vec3ForGLSL min = get_min(triangles, start, end);
-    Vec3ForGLSL max = get_max(triangles, start, end);
-
     if (span <= 8) {
+        Vec3ForGLSL min = get_min(triangles, start, end);
+        Vec3ForGLSL max = get_max(triangles, start, end);
         return Box(min, max, -1, -1, start, end);
     }
 
@@ -64,6 +63,13 @@ Box triangles_to_box(std::vector<Box> &boxes,
     boxes.push_back(
         triangles_to_box(boxes, triangles, mid, end, get_next_coord(coord)));
     int right = boxes.size() - 1;
+
+    Vec3ForGLSL min = Vec3ForGLSL{std::min(boxes[left].min.x, boxes[right].min.x),
+                           std::min(boxes[left].min.y, boxes[right].min.y),
+                           std::min(boxes[left].min.z, boxes[right].min.z)};
+    Vec3ForGLSL max = Vec3ForGLSL{std::max(boxes[left].max.x, boxes[right].max.x),
+                           std::max(boxes[left].max.y, boxes[right].max.y),
+                           std::max(boxes[left].max.z, boxes[right].max.z)};
     return Box(min, max, left, right, start, end);
 }
 
@@ -72,10 +78,9 @@ AABB *triangles_to_aabb(std::vector<Box> &boxes,
                         int end, int coord) {
     int span = end - start;
 
-    Vec3ForGLSL min = get_min(triangles, start, end);
-    Vec3ForGLSL max = get_max(triangles, start, end);
-
     if (span <= 8) {
+        Vec3ForGLSL min = get_min(triangles, start, end);
+        Vec3ForGLSL max = get_max(triangles, start, end);
         boxes.push_back(Box(min, max, -1, -1, start, end));
         return new AABB{static_cast<int>(boxes.size() - 1)};
     }
