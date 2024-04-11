@@ -41,7 +41,6 @@ const char *read_shader(std::string filename) {
 }
 
 int main(int argc, char *argv[]) {
-
     if (argc < 2) {
         std::cout << "Usage: " << argv[0]
                   << " <shader file> [<gltf_file>...] [<glb_file>...]"

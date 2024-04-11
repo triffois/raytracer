@@ -213,6 +213,11 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
         uint32_t vertex_start = static_cast<uint32_t>(vertex_buffer.size());
 
         for (const auto &primitive : mesh.primitives) {
+            if (primitive.indices == -1) {
+                std::cout << "Warning: primitive.indices == -1; skipping"
+                          << std::endl;
+                continue;
+            }
             {
                 const tinygltf::Accessor &accessor =
                     model.accessors[primitive.indices];
@@ -302,17 +307,17 @@ OurNode load_model(std::string filename) {
     if (filename.substr(filename.size() - 4) != ".glb") {
         file_loaded =
             loader.LoadASCIIFromFile(&gltf_model, &err, &warn, filename);
-            if(gltf_model.images.size() == 0){
-            }else
-            for(auto &image : gltf_model.images){
+        if (gltf_model.images.size() == 0) {
+        } else
+            for (auto &image : gltf_model.images) {
                 root_node.images.push_back(image);
             }
     } else {
         file_loaded =
             loader.LoadBinaryFromFile(&gltf_model, &err, &warn, filename);
-            if(gltf_model.images.size() == 0){
-            }else
-            for(auto &image : gltf_model.images){
+        if (gltf_model.images.size() == 0) {
+        } else
+            for (auto &image : gltf_model.images) {
                 root_node.images.push_back(image);
             }
     }
@@ -411,10 +416,10 @@ std::vector<TriangleForGLSL> node_to_triangles(const OurNode &node) {
         Vec3ForGLSL v1_transformed = transform4(node.matrix, primitive.v1);
         Vec3ForGLSL v2_transformed = transform4(node.matrix, primitive.v2);
         Vec3ForGLSL v3_transformed = transform4(node.matrix, primitive.v3);
-        Vec3ForGLSL min_transformed = v3_min(v1_transformed, v2_transformed,
-                                             v3_transformed);
-        Vec3ForGLSL max_transformed = v3_max(v1_transformed, v2_transformed,
-                                             v3_transformed);
+        Vec3ForGLSL min_transformed =
+            v3_min(v1_transformed, v2_transformed, v3_transformed);
+        Vec3ForGLSL max_transformed =
+            v3_max(v1_transformed, v2_transformed, v3_transformed);
         triangles.push_back(TriangleForGLSL{v1_transformed, v2_transformed,
                                             v3_transformed, min_transformed,
                                             max_transformed});

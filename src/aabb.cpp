@@ -2,29 +2,31 @@
 #include "./load_model.hpp"
 #include <algorithm>
 #include <iostream>
-#include <vector>
 #include <limits>
+#include <vector>
 
-Vec3ForGLSL get_min(std::vector<TriangleForGLSL> triangles, int start, int end) {
+Vec3ForGLSL get_min(std::vector<TriangleForGLSL> triangles, int start,
+                    int end) {
     Vec3ForGLSL min = Vec3ForGLSL{std::numeric_limits<float>::max(),
-                           std::numeric_limits<float>::max(),
-                           std::numeric_limits<float>::max()};
+                                  std::numeric_limits<float>::max(),
+                                  std::numeric_limits<float>::max()};
     for (int i = start; i < end; i++) {
         min = Vec3ForGLSL{std::min(min.x, triangles[i].min.x),
-                   std::min(min.y, triangles[i].min.y),
-                   std::min(min.z, triangles[i].min.z)};
+                          std::min(min.y, triangles[i].min.y),
+                          std::min(min.z, triangles[i].min.z)};
     }
     return min;
 }
 
-Vec3ForGLSL get_max(std::vector<TriangleForGLSL> triangles, int start, int end) {
+Vec3ForGLSL get_max(std::vector<TriangleForGLSL> triangles, int start,
+                    int end) {
     Vec3ForGLSL max = Vec3ForGLSL{-std::numeric_limits<float>::max(),
-                           -std::numeric_limits<float>::max(),
-                           -std::numeric_limits<float>::max()};
+                                  -std::numeric_limits<float>::max(),
+                                  -std::numeric_limits<float>::max()};
     for (int i = start; i < end; i++) {
         max = Vec3ForGLSL{std::max(max.x, triangles[i].max.x),
-                   std::max(max.y, triangles[i].max.y),
-                   std::max(max.z, triangles[i].max.z)};
+                          std::max(max.y, triangles[i].max.y),
+                          std::max(max.z, triangles[i].max.z)};
     }
     return max;
 }
@@ -64,12 +66,14 @@ Box triangles_to_box(std::vector<Box> &boxes,
         triangles_to_box(boxes, triangles, mid, end, get_next_coord(coord)));
     int right = boxes.size() - 1;
 
-    Vec3ForGLSL min = Vec3ForGLSL{std::min(boxes[left].min.x, boxes[right].min.x),
-                           std::min(boxes[left].min.y, boxes[right].min.y),
-                           std::min(boxes[left].min.z, boxes[right].min.z)};
-    Vec3ForGLSL max = Vec3ForGLSL{std::max(boxes[left].max.x, boxes[right].max.x),
-                           std::max(boxes[left].max.y, boxes[right].max.y),
-                           std::max(boxes[left].max.z, boxes[right].max.z)};
+    Vec3ForGLSL min =
+        Vec3ForGLSL{std::min(boxes[left].min.x, boxes[right].min.x),
+                    std::min(boxes[left].min.y, boxes[right].min.y),
+                    std::min(boxes[left].min.z, boxes[right].min.z)};
+    Vec3ForGLSL max =
+        Vec3ForGLSL{std::max(boxes[left].max.x, boxes[right].max.x),
+                    std::max(boxes[left].max.y, boxes[right].max.y),
+                    std::max(boxes[left].max.z, boxes[right].max.z)};
     return Box(min, max, left, right, start, end);
 }
 
@@ -98,8 +102,8 @@ void print_box(std::vector<Box> boxes, int box_id, size_t depth,
               << ", z: " << box->min.z << ", max x: " << box->max.x
               << ", y: " << box->max.y << ", z: " << box->max.z
               << ", start: " << box->start << ", end: " << box->end
-              << ", right_id: " << box->right_id << ", left_id: " << box->left_id
-              << std::endl;
+              << ", right_id: " << box->right_id
+              << ", left_id: " << box->left_id << std::endl;
     if (box->left_id != -1) {
         print_box(boxes, box->right_id, depth + 1, triangles);
         print_box(boxes, box->left_id, depth + 1, triangles);
