@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-#define DEBUG_PRINT
+// #define DEBUG_PRINT
 #ifdef DEBUG_PRINT
     std::cout << "[" << std::endl;
     for (auto &t : triangles) {
