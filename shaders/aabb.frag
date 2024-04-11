@@ -233,7 +233,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   Scene scene = Scene(lights, 1);
 
   Ray ray = cameraRay(uv, iResolution.xy,
-                      vec3(2 * sin(iTime / 10), 2 * cos(iTime / 10), 5));
+                      vec3(2 * -sin(iTime / 10), 2 * -cos(iTime / 10), 5));
   vec3 col = renderRay(ray, scene);
 
   fragColor = vec4(col, 1.0);
