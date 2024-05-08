@@ -1,0 +1,431 @@
+
+===Starting===
+===Running with Pipeline===
+====Compiling with Clang UBSan====
+-- Including Wayland support
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE) 
+-- Documentation generation requires Doxygen 1.9.8 or later
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    DEBUG_PRINT
+
+
+-- Build files have been written to: /app/project/cmake-build-debug
+[  2%] Building C object glad/CMakeFiles/glad.dir/src/glad.c.o
+[  4%] Linking C static library libglad.a
+[  4%] Built target glad
+[  6%] Generating xdg-shell-client-protocol.h
+[  8%] Generating fractional-scale-v1-client-protocol-code.h
+[ 10%] Generating fractional-scale-v1-client-protocol.h
+[ 12%] Generating idle-inhibit-unstable-v1-client-protocol-code.h
+[ 14%] Generating idle-inhibit-unstable-v1-client-protocol.h
+[ 17%] Generating pointer-constraints-unstable-v1-client-protocol-code.h
+[ 19%] Generating pointer-constraints-unstable-v1-client-protocol.h
+[ 21%] Generating relative-pointer-unstable-v1-client-protocol-code.h
+[ 23%] Generating relative-pointer-unstable-v1-client-protocol.h
+[ 25%] Generating viewporter-client-protocol-code.h
+[ 27%] Generating viewporter-client-protocol.h
+[ 29%] Generating wayland-client-protocol-code.h
+[ 31%] Generating wayland-client-protocol.h
+[ 34%] Generating xdg-activation-v1-client-protocol-code.h
+[ 36%] Generating xdg-activation-v1-client-protocol.h
+[ 38%] Generating xdg-decoration-unstable-v1-client-protocol-code.h
+[ 40%] Generating xdg-decoration-unstable-v1-client-protocol.h
+[ 42%] Generating xdg-shell-client-protocol-code.h
+[ 44%] Building C object glfw/src/CMakeFiles/glfw.dir/context.c.o
+[ 46%] Building C object glfw/src/CMakeFiles/glfw.dir/init.c.o
+[ 48%] Building C object glfw/src/CMakeFiles/glfw.dir/input.c.o
+[ 51%] Building C object glfw/src/CMakeFiles/glfw.dir/monitor.c.o
+[ 53%] Building C object glfw/src/CMakeFiles/glfw.dir/platform.c.o
+[ 55%] Building C object glfw/src/CMakeFiles/glfw.dir/vulkan.c.o
+[ 57%] Building C object glfw/src/CMakeFiles/glfw.dir/window.c.o
+[ 59%] Building C object glfw/src/CMakeFiles/glfw.dir/egl_context.c.o
+[ 61%] Building C object glfw/src/CMakeFiles/glfw.dir/osmesa_context.c.o
+[ 63%] Building C object glfw/src/CMakeFiles/glfw.dir/null_init.c.o
+[ 65%] Building C object glfw/src/CMakeFiles/glfw.dir/null_monitor.c.o
+[ 68%] Building C object glfw/src/CMakeFiles/glfw.dir/null_window.c.o
+[ 70%] Building C object glfw/src/CMakeFiles/glfw.dir/null_joystick.c.o
+[ 72%] Building C object glfw/src/CMakeFiles/glfw.dir/posix_module.c.o
+[ 74%] Building C object glfw/src/CMakeFiles/glfw.dir/posix_time.c.o
+[ 76%] Building C object glfw/src/CMakeFiles/glfw.dir/posix_thread.c.o
+[ 78%] Building C object glfw/src/CMakeFiles/glfw.dir/wl_init.c.o
+[ 80%] Building C object glfw/src/CMakeFiles/glfw.dir/wl_monitor.c.o
+[ 82%] Building C object glfw/src/CMakeFiles/glfw.dir/wl_window.c.o
+[ 85%] Building C object glfw/src/CMakeFiles/glfw.dir/xkb_unicode.c.o
+[ 87%] Building C object glfw/src/CMakeFiles/glfw.dir/linux_joystick.c.o
+[ 89%] Building C object glfw/src/CMakeFiles/glfw.dir/posix_poll.c.o
+[ 91%] Linking C static library libglfw3.a
+[ 91%] Built target glfw
+[ 93%] Building CXX object CMakeFiles/clang-ubsan.dir/src/aabb.cpp.o
+[ 95%] Building CXX object CMakeFiles/clang-ubsan.dir/src/load_model.cpp.o
+[ 97%] Building CXX object CMakeFiles/clang-ubsan.dir/src/main.cpp.o
+[100%] Linking CXX executable clang-ubsan
+[100%] Built target clang-ubsan
+-- Install configuration: "Debug"
+-- Installing: /app/project/lib64/libglfw3.a
+-- Installing: /app/project/include/GLFW
+-- Installing: /app/project/include/GLFW/glfw3.h
+-- Installing: /app/project/include/GLFW/glfw3native.h
+-- Installing: /app/project/lib64/cmake/glfw3/glfw3Config.cmake
+-- Installing: /app/project/lib64/cmake/glfw3/glfw3ConfigVersion.cmake
+-- Installing: /app/project/lib64/cmake/glfw3/glfw3Targets.cmake
+-- Installing: /app/project/lib64/cmake/glfw3/glfw3Targets-debug.cmake
+-- Installing: /app/project/lib64/pkgconfig/glfw3.pc
+====Compiling with Clang ASan====
+-- Including Wayland support
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE) 
+-- Documentation generation requires Doxygen 1.9.8 or later
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /app/project/cmake-build-debug
+[  4%] Built target glad
+[ 91%] Built target glfw
+[ 93%] Building CXX object CMakeFiles/clang-asan.dir/src/aabb.cpp.o
+[ 95%] Building CXX object CMakeFiles/clang-asan.dir/src/load_model.cpp.o
+[ 97%] Building CXX object CMakeFiles/clang-asan.dir/src/main.cpp.o
+[100%] Linking CXX executable clang-asan
+[100%] Built target clang-asan
+-- Install configuration: "Debug"
+-- Up-to-date: /app/project/lib64/libglfw3.a
+-- Up-to-date: /app/project/include/GLFW
+-- Up-to-date: /app/project/include/GLFW/glfw3.h
+-- Up-to-date: /app/project/include/GLFW/glfw3native.h
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3Config.cmake
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3ConfigVersion.cmake
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3Targets.cmake
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3Targets-debug.cmake
+-- Up-to-date: /app/project/lib64/pkgconfig/glfw3.pc
+====Compiling with Clang TSan====
+-- Including Wayland support
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE) 
+-- Documentation generation requires Doxygen 1.9.8 or later
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /app/project/cmake-build-debug
+[  4%] Built target glad
+[ 91%] Built target glfw
+[ 93%] Building CXX object CMakeFiles/clang-tsan.dir/src/aabb.cpp.o
+[ 95%] Building CXX object CMakeFiles/clang-tsan.dir/src/load_model.cpp.o
+[ 97%] Building CXX object CMakeFiles/clang-tsan.dir/src/main.cpp.o
+[100%] Linking CXX executable clang-tsan
+[100%] Built target clang-tsan
+-- Install configuration: "Debug"
+-- Up-to-date: /app/project/lib64/libglfw3.a
+-- Up-to-date: /app/project/include/GLFW
+-- Up-to-date: /app/project/include/GLFW/glfw3.h
+-- Up-to-date: /app/project/include/GLFW/glfw3native.h
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3Config.cmake
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3ConfigVersion.cmake
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3Targets.cmake
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3Targets-debug.cmake
+-- Up-to-date: /app/project/lib64/pkgconfig/glfw3.pc
+====Compiling with Clang MSan====
+-- Including Wayland support
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE) 
+-- Documentation generation requires Doxygen 1.9.8 or later
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /app/project/cmake-build-debug
+[  4%] Built target glad
+[ 91%] Built target glfw
+[ 93%] Building CXX object CMakeFiles/clang-msan.dir/src/aabb.cpp.o
+[ 95%] Building CXX object CMakeFiles/clang-msan.dir/src/load_model.cpp.o
+[ 97%] Building CXX object CMakeFiles/clang-msan.dir/src/main.cpp.o
+[100%] Linking CXX executable clang-msan
+[100%] Built target clang-msan
+-- Install configuration: "Debug"
+-- Up-to-date: /app/project/lib64/libglfw3.a
+-- Up-to-date: /app/project/include/GLFW
+-- Up-to-date: /app/project/include/GLFW/glfw3.h
+-- Up-to-date: /app/project/include/GLFW/glfw3native.h
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3Config.cmake
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3ConfigVersion.cmake
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3Targets.cmake
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3Targets-debug.cmake
+-- Up-to-date: /app/project/lib64/pkgconfig/glfw3.pc
+====Compiling with GCC + PVS + clang-tidy====
+**Adding PVS headers to the files:**
+./glad/include/KHR/khrplatform.h
+./glad/include/glad/glad.h
+./glad/src/glad.c
+./src/aabb.cpp
+./src/load_model.cpp
+./src/use_opengl.h
+./src/main.cpp
+./glfw/deps/getopt.c
+./glfw/deps/getopt.h
+./glfw/deps/glad/gl.h
+./glfw/deps/glad/gles2.h
+./glfw/deps/glad/vulkan.h
+./glfw/deps/linmath.h
+./glfw/deps/mingw/_mingw_dxhelper.h
+./glfw/deps/mingw/dinput.h
+./glfw/deps/mingw/xinput.h
+./glfw/deps/nuklear.h
+./glfw/deps/nuklear_glfw_gl2.h
+./glfw/deps/stb_image_write.h
+./glfw/deps/tinycthread.c
+./glfw/deps/tinycthread.h
+./glfw/examples/boing.c
+./glfw/examples/gears.c
+./glfw/examples/heightmap.c
+./glfw/examples/offscreen.c
+./glfw/examples/particles.c
+./glfw/examples/sharing.c
+./glfw/examples/splitview.c
+./glfw/examples/triangle-opengl.c
+./glfw/examples/triangle-opengles.c
+./glfw/examples/wave.c
+./glfw/examples/windows.c
+./glfw/include/GLFW/glfw3.h
+./glfw/include/GLFW/glfw3native.h
+./glfw/src/cocoa_joystick.h
+./glfw/src/cocoa_platform.h
+./glfw/src/cocoa_time.c
+./glfw/src/cocoa_time.h
+./glfw/src/context.c
+./glfw/src/egl_context.c
+./glfw/src/glx_context.c
+./glfw/src/init.c
+./glfw/src/input.c
+./glfw/src/internal.h
+./glfw/src/linux_joystick.c
+./glfw/src/linux_joystick.h
+./glfw/src/mappings.h
+./glfw/src/monitor.c
+./glfw/src/null_init.c
+./glfw/src/null_joystick.c
+./glfw/src/null_joystick.h
+./glfw/src/null_monitor.c
+./glfw/src/null_platform.h
+./glfw/src/null_window.c
+./glfw/src/osmesa_context.c
+./glfw/src/platform.c
+./glfw/src/platform.h
+./glfw/src/posix_module.c
+./glfw/src/posix_poll.c
+./glfw/src/posix_poll.h
+./glfw/src/posix_thread.c
+./glfw/src/posix_thread.h
+./glfw/src/posix_time.c
+./glfw/src/posix_time.h
+./glfw/src/vulkan.c
+./glfw/src/wgl_context.c
+./glfw/src/win32_init.c
+./glfw/src/win32_joystick.c
+./glfw/src/win32_joystick.h
+./glfw/src/win32_module.c
+./glfw/src/win32_monitor.c
+./glfw/src/win32_platform.h
+./glfw/src/win32_thread.c
+./glfw/src/win32_thread.h
+./glfw/src/win32_time.c
+./glfw/src/win32_time.h
+./glfw/src/win32_window.c
+./glfw/src/window.c
+./glfw/src/wl_init.c
+./glfw/src/wl_monitor.c
+./glfw/src/wl_platform.h
+./glfw/src/wl_window.c
+./glfw/src/x11_init.c
+./glfw/src/x11_monitor.c
+./glfw/src/x11_platform.h
+./glfw/src/x11_window.c
+./glfw/src/xkb_unicode.c
+./glfw/src/xkb_unicode.h
+./glfw/tests/allocator.c
+./glfw/tests/clipboard.c
+./glfw/tests/cursor.c
+./glfw/tests/empty.c
+./glfw/tests/events.c
+./glfw/tests/gamma.c
+./glfw/tests/glfwinfo.c
+./glfw/tests/icon.c
+./glfw/tests/iconify.c
+./glfw/tests/inputlag.c
+./glfw/tests/joysticks.c
+./glfw/tests/monitors.c
+./glfw/tests/msaa.c
+./glfw/tests/reopen.c
+./glfw/tests/tearing.c
+./glfw/tests/threads.c
+./glfw/tests/timeout.c
+./glfw/tests/title.c
+./glfw/tests/triangle-vulkan.c
+./glfw/tests/window.c
+./tinygltf/stb_image.h
+./tinygltf/stb_image_write.h
+./tinygltf/json.hpp
+./tinygltf/tiny_gltf.h
+./include/aabb.hpp
+./include/load_model.hpp
+./include/GLFW/glfw3.h
+./include/GLFW/glfw3native.h
+-- Including Wayland support
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE) 
+-- Documentation generation requires Doxygen 1.9.8 or later
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /app/project/cmake-build-debug
+[  2%] Building C object glad/CMakeFiles/glad.dir/src/glad.c.o
+[  4%] Linking C static library libglad.a
+[  4%] Built target glad
+[  6%] Building C object glfw/src/CMakeFiles/glfw.dir/context.c.o
+[  8%] Building C object glfw/src/CMakeFiles/glfw.dir/init.c.o
+[ 10%] Building C object glfw/src/CMakeFiles/glfw.dir/input.c.o
+[ 12%] Building C object glfw/src/CMakeFiles/glfw.dir/monitor.c.o
+[ 14%] Building C object glfw/src/CMakeFiles/glfw.dir/platform.c.o
+[ 17%] Building C object glfw/src/CMakeFiles/glfw.dir/vulkan.c.o
+[ 19%] Building C object glfw/src/CMakeFiles/glfw.dir/window.c.o
+[ 21%] Building C object glfw/src/CMakeFiles/glfw.dir/egl_context.c.o
+[ 23%] Building C object glfw/src/CMakeFiles/glfw.dir/osmesa_context.c.o
+[ 25%] Building C object glfw/src/CMakeFiles/glfw.dir/null_init.c.o
+[ 27%] Building C object glfw/src/CMakeFiles/glfw.dir/null_monitor.c.o
+[ 29%] Building C object glfw/src/CMakeFiles/glfw.dir/null_window.c.o
+[ 31%] Building C object glfw/src/CMakeFiles/glfw.dir/null_joystick.c.o
+[ 34%] Building C object glfw/src/CMakeFiles/glfw.dir/posix_module.c.o
+[ 36%] Building C object glfw/src/CMakeFiles/glfw.dir/posix_time.c.o
+[ 38%] Building C object glfw/src/CMakeFiles/glfw.dir/posix_thread.c.o
+[ 40%] Building C object glfw/src/CMakeFiles/glfw.dir/wl_init.c.o
+[ 42%] Building C object glfw/src/CMakeFiles/glfw.dir/wl_monitor.c.o
+[ 44%] Building C object glfw/src/CMakeFiles/glfw.dir/wl_window.c.o
+[ 46%] Building C object glfw/src/CMakeFiles/glfw.dir/xkb_unicode.c.o
+[ 48%] Building C object glfw/src/CMakeFiles/glfw.dir/linux_joystick.c.o
+[ 51%] Building C object glfw/src/CMakeFiles/glfw.dir/posix_poll.c.o
+[ 53%] Linking C static library libglfw3.a
+[ 91%] Built target glfw
+[ 93%] Building CXX object CMakeFiles/MYOWNRAYTRACER.dir/src/aabb.cpp.o
+[ 95%] Building CXX object CMakeFiles/MYOWNRAYTRACER.dir/src/load_model.cpp.o
+[ 97%] Building CXX object CMakeFiles/MYOWNRAYTRACER.dir/src/main.cpp.o
+[100%] Linking CXX executable MYOWNRAYTRACER
+[100%] Built target MYOWNRAYTRACER
+-- Install configuration: "Debug"
+-- Installing: /app/project/lib64/libglfw3.a
+-- Up-to-date: /app/project/include/GLFW
+-- Up-to-date: /app/project/include/GLFW/glfw3.h
+-- Up-to-date: /app/project/include/GLFW/glfw3native.h
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3Config.cmake
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3ConfigVersion.cmake
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3Targets.cmake
+-- Up-to-date: /app/project/lib64/cmake/glfw3/glfw3Targets-debug.cmake
+-- Up-to-date: /app/project/lib64/pkgconfig/glfw3.pc
+**Removing PVS headers from files:**
+./glad/include/KHR/khrplatform.h
+./glad/include/glad/glad.h
+./glad/src/glad.c
+./src/aabb.cpp
+./src/load_model.cpp
+./src/use_opengl.h
+./src/main.cpp
+./glfw/deps/glad/gl.h
+./glfw/deps/glad/gles2.h
+./glfw/deps/glad/vulkan.h
+./glfw/deps/mingw/_mingw_dxhelper.h
+./glfw/deps/mingw/dinput.h
+./glfw/deps/mingw/xinput.h
+./glfw/deps/getopt.c
+./glfw/deps/getopt.h
+./glfw/deps/linmath.h
+./glfw/deps/nuklear.h
+./glfw/deps/nuklear_glfw_gl2.h
+./glfw/deps/stb_image_write.h
+./glfw/deps/tinycthread.c
+./glfw/deps/tinycthread.h
+./glfw/examples/boing.c
+./glfw/examples/gears.c
+./glfw/examples/heightmap.c
+./glfw/examples/offscreen.c
+./glfw/examples/particles.c
+./glfw/examples/sharing.c
+./glfw/examples/splitview.c
+./glfw/examples/triangle-opengl.c
+./glfw/examples/triangle-opengles.c
+./glfw/examples/wave.c
+./glfw/examples/windows.c
+./glfw/include/GLFW/glfw3.h
+./glfw/include/GLFW/glfw3native.h
+./glfw/src/cocoa_joystick.h
+./glfw/src/cocoa_platform.h
+./glfw/src/cocoa_time.c
+./glfw/src/cocoa_time.h
+./glfw/src/context.c
+./glfw/src/egl_context.c
+./glfw/src/glx_context.c
+./glfw/src/init.c
+./glfw/src/input.c
+./glfw/src/internal.h
+./glfw/src/linux_joystick.c
+./glfw/src/linux_joystick.h
+./glfw/src/mappings.h
+./glfw/src/monitor.c
+./glfw/src/null_init.c
+./glfw/src/null_joystick.c
+./glfw/src/null_joystick.h
+./glfw/src/null_monitor.c
+./glfw/src/null_platform.h
+./glfw/src/null_window.c
+./glfw/src/osmesa_context.c
+./glfw/src/platform.c
+./glfw/src/platform.h
+./glfw/src/posix_module.c
+./glfw/src/posix_poll.c
+./glfw/src/posix_poll.h
+./glfw/src/posix_thread.c
+./glfw/src/posix_thread.h
+./glfw/src/posix_time.c
+./glfw/src/posix_time.h
+./glfw/src/vulkan.c
+./glfw/src/wgl_context.c
+./glfw/src/win32_init.c
+./glfw/src/win32_joystick.c
+./glfw/src/win32_joystick.h
+./glfw/src/win32_module.c
+./glfw/src/win32_monitor.c
+./glfw/src/win32_platform.h
+./glfw/src/win32_thread.c
+./glfw/src/win32_thread.h
+./glfw/src/win32_time.c
+./glfw/src/win32_time.h
+./glfw/src/win32_window.c
+./glfw/src/window.c
+./glfw/src/wl_init.c
+./glfw/src/wl_monitor.c
+./glfw/src/wl_platform.h
+./glfw/src/wl_window.c
+./glfw/src/x11_init.c
+./glfw/src/x11_monitor.c
+./glfw/src/x11_platform.h
+./glfw/src/x11_window.c
+./glfw/src/xkb_unicode.c
+./glfw/src/xkb_unicode.h
+./glfw/tests/allocator.c
+./glfw/tests/clipboard.c
+./glfw/tests/cursor.c
+./glfw/tests/empty.c
+./glfw/tests/events.c
+./glfw/tests/gamma.c
+./glfw/tests/glfwinfo.c
+./glfw/tests/icon.c
+./glfw/tests/iconify.c
+./glfw/tests/inputlag.c
+./glfw/tests/joysticks.c
+./glfw/tests/monitors.c
+./glfw/tests/msaa.c
+./glfw/tests/reopen.c
+./glfw/tests/tearing.c
+./glfw/tests/threads.c
+./glfw/tests/timeout.c
+./glfw/tests/title.c
+./glfw/tests/triangle-vulkan.c
+./glfw/tests/window.c
+./tinygltf/stb_image.h
+./tinygltf/stb_image_write.h
+./tinygltf/json.hpp
+./tinygltf/tiny_gltf.h
+./include/GLFW/glfw3.h
+./include/GLFW/glfw3native.h
+./include/aabb.hpp
+./include/load_model.hpp

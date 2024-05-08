@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 3.20.0 FATAL_ERROR)
 
-project(OpenGLTemplate)
+# Pipeline
+set(PROJECT MYOWNRAYTRACER)
+set(ENABLE_PVS_STUDIO OFF)
+set(ENABLE_UBSan OFF)
+set(ENABLE_ASAN OFF)
+set(ENABLE_TSan OFF)
+set(ENABLE_MSAN OFF)
+##set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*")
+
+project(${PROJECT})
 
 #! Export compile_commands.json for lsps
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
