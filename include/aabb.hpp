@@ -26,12 +26,12 @@ int get_next_coord(int coord);
 float get_coord(int coord, const Vec3ForGLSL &v);
 
 Box triangles_to_box(std::vector<Box> &boxes,
-                     std::vector<TriangleForGLSL*> &triangles, int start,
+                     std::vector<TriangleForGLSL *> &triangles, int start,
                      int end, int coord);
 
 AABB *triangles_to_aabb(std::vector<Box> &boxes,
-                        std::vector<TriangleForGLSL*> &triangles, int start,
+                        std::vector<TriangleForGLSL *> &triangles, int start,
                         int end, int coord);
 
 void print_box(std::vector<Box> boxes, int box_id, size_t depth,
-               std::vector<TriangleForGLSL*> &triangles);
+               std::vector<TriangleForGLSL *> &triangles);

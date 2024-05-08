@@ -5,7 +5,7 @@
 #include <limits>
 #include <vector>
 
-Vec3ForGLSL get_min(std::vector<TriangleForGLSL *> triangles, int start,
+Vec3ForGLSL get_min(const std::vector<TriangleForGLSL *> &triangles, int start,
                     int end) {
     Vec3ForGLSL min = Vec3ForGLSL{std::numeric_limits<float>::max(),
                                   std::numeric_limits<float>::max(),
@@ -18,7 +18,7 @@ Vec3ForGLSL get_min(std::vector<TriangleForGLSL *> triangles, int start,
     return min;
 }
 
-Vec3ForGLSL get_max(std::vector<TriangleForGLSL *> triangles, int start,
+Vec3ForGLSL get_max(const std::vector<TriangleForGLSL *> &triangles, int start,
                     int end) {
     Vec3ForGLSL max = Vec3ForGLSL{-std::numeric_limits<float>::max(),
                                   -std::numeric_limits<float>::max(),

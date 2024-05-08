@@ -4,7 +4,7 @@
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#define DEBUG_PRINT
+// #define DEBUG_PRINT
 
 #include <chrono>
 #include <cstring>
