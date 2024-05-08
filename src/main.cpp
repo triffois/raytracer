@@ -4,11 +4,13 @@
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#define DEBUG_PRINT
 
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <chrono>
 
 #include "./aabb.hpp"
 #include "./load_model.hpp"
@@ -48,6 +50,9 @@ int main(int argc, char *argv[]) {
     std::string shader_path = argv[1];
     std::vector<TriangleForGLSL> triangles;
     std::vector<tinygltf::Image> textures;
+#ifdef DEBUG_PRINT
+    auto start_model = std::chrono::high_resolution_clock::now();
+#endif
     for (int i = 2; i < argc; ++i) {
         std::string path = argv[i];
         OurNode model = load_model(path);
@@ -60,9 +65,16 @@ int main(int argc, char *argv[]) {
             textures.push_back(model.images[j]);
         }
     }
-
-// #define DEBUG_PRINT
 #ifdef DEBUG_PRINT
+    auto end_model = std::chrono::high_resolution_clock::now();
+    std::cout << "Model loading took "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     end_model - start_model)
+                     .count()
+              << "ms" << std::endl;
+#endif
+
+#ifdef DEBUG_PRINT_EXTENDED
     std::cout << "[" << std::endl;
     for (auto &t : triangles) {
         std::cout << "  ";
@@ -74,9 +86,20 @@ int main(int argc, char *argv[]) {
     std::cout << "]" << std::endl;
 #endif
 
+#ifdef DEBUG_PRINT
+    auto start_aabb = std::chrono::high_resolution_clock::now();
+#endif
     std::vector<Box> boxes;
     AABB *aabb = triangles_to_aabb(boxes, triangles, 0, triangles.size(), 0);
 #ifdef DEBUG_PRINT
+    auto end_aabb = std::chrono::high_resolution_clock::now();
+    std::cout << "AABB construction took "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     end_aabb - start_aabb)
+                     .count()
+              << "ms" << std::endl;
+#endif
+#ifdef DEBUG_PRINT_EXTENDED
     print_box(boxes, aabb->root_id, 0, triangles);
 #endif
 
@@ -126,6 +149,9 @@ int main(int argc, char *argv[]) {
                   << info_log << std::endl;
     }
     // fragment shader
+#ifdef DEBUG_PRINT
+    auto start_fragment = std::chrono::high_resolution_clock::now();
+#endif
     unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     const char *shader_source = read_shader(shader_path);
     glShaderSource(fragment_shader, 1, &shader_source, NULL);
@@ -137,6 +163,14 @@ int main(int argc, char *argv[]) {
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
                   << info_log << std::endl;
     }
+#ifdef DEBUG_PRINT
+    auto end_fragment = std::chrono::high_resolution_clock::now();
+    std::cout << "Fragment shader compilation took "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     end_fragment - start_fragment)
+                     .count()
+              << "ms" << std::endl;
+#endif
     // link shaders
     unsigned int shader_program = glCreateProgram();
     glAttachShader(shader_program, vertex_shader);
@@ -154,6 +188,9 @@ int main(int argc, char *argv[]) {
     delete[] shader_source;
 
     // configure textures
+#ifdef DEBUG_PRINT
+    auto start_texture = std::chrono::high_resolution_clock::now();
+#endif
     GLuint *texture_data = new GLuint[textures.size()];
     glGenTextures(textures.size(), texture_data);
 
@@ -164,6 +201,14 @@ int main(int argc, char *argv[]) {
                      textures[i].image.data());
         glGenerateMipmap(GL_TEXTURE_2D);
     }
+#ifdef DEBUG_PRINT
+    auto end_texture = std::chrono::high_resolution_clock::now();
+    std::cout << "Texture loading into opengl took "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     end_texture - start_texture)
+                     .count()
+              << "ms" << std::endl;
+#endif
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -203,6 +248,9 @@ int main(int argc, char *argv[]) {
     int frame = 0;
     // SSBO for vectors
     // triangles
+#ifdef DEBUG_PRINT
+    auto start_ssbo = std::chrono::high_resolution_clock::now();
+#endif
     GLuint ssbo_triangles;
     glGenBuffers(1, &ssbo_triangles);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_triangles);
@@ -217,6 +265,14 @@ int main(int argc, char *argv[]) {
                  boxes.data(), GL_DYNAMIC_COPY);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_boxes);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+#ifdef DEBUG_PRINT
+    auto end_ssbo = std::chrono::high_resolution_clock::now();
+    std::cout << "SSBO creation took "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     end_ssbo - start_ssbo)
+                     .count()
+              << "ms" << std::endl;
+#endif
     while (!glfwWindowShouldClose(window)) {
         // input
         // -----
