@@ -202,7 +202,7 @@ NextCast castRay(Ray ray, Scene scene) {
 Ray cameraRay(vec2 uv, vec2 resolution, vec3 origin) {
   vec3 ray_origin = vec3(0);
   vec2 sensor_size = vec2(resolution.x / resolution.y, 1);
-  vec3 point_on_sensor = vec3((0.5 - uv) * sensor_size, -FOCAL_LENGTH);
+  vec3 point_on_sensor = vec3((-0.5 + uv) * sensor_size, -FOCAL_LENGTH);
   return Ray(origin, normalize(point_on_sensor - ray_origin));
 }
 
@@ -233,7 +233,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   Scene scene = Scene(lights, 1);
 
   Ray ray = cameraRay(uv, iResolution.xy,
-                      vec3(2 * -sin(iTime / 10), 2 * -cos(iTime / 10), 5));
+                      vec3(2 * sin(iTime / 10), 2 * cos(iTime / 10), 5));
   vec3 col = renderRay(ray, scene);
 
   fragColor = vec4(col, 1.0);
