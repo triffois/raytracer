@@ -11,6 +11,8 @@ set(ENABLE_MSAN OFF)
 
 project(${PROJECT})
 
+include(cmake/CompilerWarnings.cmake)
+
 #! Export compile_commands.json for lsps
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -53,3 +55,13 @@ target_link_directories(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} ${LIBS})
+
+INSTALL(PROGRAMS
+    $<TARGET_FILE:${PROJECT}> # ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
+        DESTINATION bin)
+
+# Define ALL_TARGETS variable to use in PVS and Sanitizers
+set(ALL_TARGETS ${PROJECT})
+
+# Include CMake setup
+include(cmake/main-config.cmake)

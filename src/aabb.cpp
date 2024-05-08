@@ -9,11 +9,11 @@ Vec3ForGLSL get_min(std::vector<TriangleForGLSL> triangles, int start,
                     int end) {
     Vec3ForGLSL min = Vec3ForGLSL{std::numeric_limits<float>::max(),
                                   std::numeric_limits<float>::max(),
-                                  std::numeric_limits<float>::max()};
+                                  std::numeric_limits<float>::max(), 0};
     for (int i = start; i < end; i++) {
         min = Vec3ForGLSL{std::min(min.x, triangles[i].min.x),
                           std::min(min.y, triangles[i].min.y),
-                          std::min(min.z, triangles[i].min.z)};
+                          std::min(min.z, triangles[i].min.z), 0};
     }
     return min;
 }
@@ -22,11 +22,11 @@ Vec3ForGLSL get_max(std::vector<TriangleForGLSL> triangles, int start,
                     int end) {
     Vec3ForGLSL max = Vec3ForGLSL{-std::numeric_limits<float>::max(),
                                   -std::numeric_limits<float>::max(),
-                                  -std::numeric_limits<float>::max()};
+                                  -std::numeric_limits<float>::max(), 0};
     for (int i = start; i < end; i++) {
         max = Vec3ForGLSL{std::max(max.x, triangles[i].max.x),
                           std::max(max.y, triangles[i].max.y),
-                          std::max(max.z, triangles[i].max.z)};
+                          std::max(max.z, triangles[i].max.z), 0};
     }
     return max;
 }
@@ -69,11 +69,11 @@ Box triangles_to_box(std::vector<Box> &boxes,
     Vec3ForGLSL min =
         Vec3ForGLSL{std::min(boxes[left].min.x, boxes[right].min.x),
                     std::min(boxes[left].min.y, boxes[right].min.y),
-                    std::min(boxes[left].min.z, boxes[right].min.z)};
+                    std::min(boxes[left].min.z, boxes[right].min.z), 0};
     Vec3ForGLSL max =
         Vec3ForGLSL{std::max(boxes[left].max.x, boxes[right].max.x),
                     std::max(boxes[left].max.y, boxes[right].max.y),
-                    std::max(boxes[left].max.z, boxes[right].max.z)};
+                    std::max(boxes[left].max.z, boxes[right].max.z), 0};
     return Box(min, max, left, right, start, end);
 }
 
@@ -94,7 +94,7 @@ AABB *triangles_to_aabb(std::vector<Box> &boxes,
 
 void print_box(std::vector<Box> boxes, int box_id, size_t depth,
                std::vector<TriangleForGLSL> &triangles) {
-    for (int i = 0; i < depth; i++) {
+    for (size_t i = 0; i < depth; ++i) {
         std::cout << "  ";
     }
     const Box *box = &boxes[box_id];
@@ -111,7 +111,7 @@ void print_box(std::vector<Box> boxes, int box_id, size_t depth,
     }
     // print triangles
     for (int i = box->start; i < box->end; i++) {
-        for (int j = 0; j < depth; j++) {
+        for (size_t j = 0; j < depth; ++j) {
             std::cout << "  ";
         }
         std::cout << "  ";
