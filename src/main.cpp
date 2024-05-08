@@ -151,6 +151,7 @@ int main(int argc, char *argv[]) {
     }
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
+    delete[] shader_source;
 
     // configure textures
     GLuint *texture_data = new GLuint[textures.size()];
@@ -274,6 +275,7 @@ int main(int argc, char *argv[]) {
     // ------------------------------------------------------------------
     glfwTerminate();
     delete[] texture_data;
+    delete aabb;
     return 0;
 }
 
