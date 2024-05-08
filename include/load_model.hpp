@@ -82,6 +82,6 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
 
 OurNode load_model(std::string filename);
 
-std::vector<TriangleForGLSL> node_to_triangles(const OurNode &node);
+std::vector<TriangleForGLSL*> node_to_triangles(const OurNode &node);
 
 #endif // INCLUDE_LOAD_MODEL_HPP_

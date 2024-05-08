@@ -6,11 +6,11 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define DEBUG_PRINT
 
+#include <chrono>
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <chrono>
 
 #include "./aabb.hpp"
 #include "./load_model.hpp"
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     std::string shader_path = argv[1];
-    std::vector<TriangleForGLSL> triangles;
+    std::vector<TriangleForGLSL *> triangles;
     std::vector<tinygltf::Image> textures;
 #ifdef DEBUG_PRINT
     auto start_model = std::chrono::high_resolution_clock::now();
@@ -56,13 +56,13 @@ int main(int argc, char *argv[]) {
     for (int i = 2; i < argc; ++i) {
         std::string path = argv[i];
         OurNode model = load_model(path);
-        std::vector<TriangleForGLSL> new_triangles = node_to_triangles(model);
-        triangles.reserve(triangles.size() +
-                          distance(new_triangles.begin(), new_triangles.end()));
-        triangles.insert(triangles.end(), new_triangles.begin(),
-                         new_triangles.end());
+        std::vector<TriangleForGLSL *> new_triangles = node_to_triangles(model);
+        triangles.reserve(triangles.size() + new_triangles.size());
+        triangles.insert(triangles.end(),
+                         std::make_move_iterator(new_triangles.begin()),
+                         std::make_move_iterator(new_triangles.end()));
         for (size_t j = 0; j < model.images.size(); ++j) {
-            textures.push_back(model.images[j]);
+            textures.emplace_back(model.images[j]);
         }
     }
 #ifdef DEBUG_PRINT
@@ -248,6 +248,14 @@ int main(int argc, char *argv[]) {
     int frame = 0;
     // SSBO for vectors
     // triangles
+    // copy triangles to array
+    TriangleForGLSL *triangle_array = new TriangleForGLSL[triangles.size()];
+    for (size_t i = 0; i < triangles.size(); ++i) {
+        triangle_array[i] = *triangles[i];
+    }
+    for (auto t : triangles) {
+        delete t;
+    }
 #ifdef DEBUG_PRINT
     auto start_ssbo = std::chrono::high_resolution_clock::now();
 #endif
@@ -255,7 +263,7 @@ int main(int argc, char *argv[]) {
     glGenBuffers(1, &ssbo_triangles);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_triangles);
     glBufferData(GL_SHADER_STORAGE_BUFFER,
-                 triangles.size() * sizeof(TriangleForGLSL), triangles.data(),
+                 triangles.size() * sizeof(TriangleForGLSL), triangle_array,
                  GL_DYNAMIC_COPY);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_triangles);
     GLuint ssbo_boxes;
@@ -285,15 +293,19 @@ int main(int argc, char *argv[]) {
 
         // draw our first triangle
         glUseProgram(shader_program);
-        glBindVertexArray(VAO); // seeing as we only have a single VAO there's
-                                // no need to bind it every time, but we'll do
-                                // so to keep things a bit more organized
+        glBindVertexArray(VAO); // seeing as we only have a single VAO
+        // there's
+        // no need to bind it every time, but we'll
+        // do
+        // so to keep things a bit more organized
         glDrawArrays(GL_TRIANGLES, 0, 6);
         // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         // glBindVertexArray(0); // no need to unbind it every time
 
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse
+        // glfw: swap buffers and poll IO events (keys pressed/released,
+        // mouse
         // moved etc.)
+        //
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -303,7 +315,8 @@ int main(int argc, char *argv[]) {
         int screen_size_location =
             glGetUniformLocation(shader_program, "iResolution");
         // glUniform2f(screenSizeLocation, SCR_WIDTH, SCR_HEIGHT);
-        // This only gets the original window size, not the actual size of the
+        // This only gets the original window size, not the actual size of
+        // the
         // window
         int width, height;
         glfwGetWindowSize(window, &width, &height);

@@ -235,7 +235,7 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                                         buffer_view.byteOffset],
                            accessor.count * sizeof(uint32_t));
                     for (size_t index = 0; index < accessor.count; index++) {
-                        index_buffer.push_back(buf[index] + vertex_start);
+                        index_buffer.emplace_back(buf[index] + vertex_start);
                     }
                     delete[] buf;
                     break;
@@ -247,7 +247,7 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                                         buffer_view.byteOffset],
                            accessor.count * sizeof(uint16_t));
                     for (size_t index = 0; index < accessor.count; index++) {
-                        index_buffer.push_back(buf[index] + vertex_start);
+                        index_buffer.emplace_back(buf[index] + vertex_start);
                     }
                     delete[] buf;
                     break;
@@ -259,7 +259,7 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                                         buffer_view.byteOffset],
                            accessor.count * sizeof(uint8_t));
                     for (size_t index = 0; index < accessor.count; index++) {
-                        index_buffer.push_back(buf[index] + vertex_start);
+                        index_buffer.emplace_back(buf[index] + vertex_start);
                     }
                     delete[] buf;
                     break;
@@ -288,14 +288,14 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                     Vec3 v2 = make_vec3(&positions[index_buffer[i + 1] * 3]);
                     Vec3 v3 = make_vec3(&positions[index_buffer[i + 2] * 3]);
                     Triangle triangle{v1, v2, v3};
-                    primitives->push_back(triangle);
+                    primitives->emplace_back(triangle);
                 }
             }
         }
         new_node.primitives = *primitives;
         delete primitives;
     }
-    parent->children.push_back(new_node);
+    parent->children.emplace_back(new_node);
 }
 
 OurNode load_model(std::string filename) {
@@ -312,7 +312,7 @@ OurNode load_model(std::string filename) {
         if (gltf_model.images.size() == 0) {
         } else
             for (auto &image : gltf_model.images) {
-                root_node.images.push_back(image);
+                root_node.images.emplace_back(image);
             }
     } else {
         file_loaded =
@@ -320,7 +320,7 @@ OurNode load_model(std::string filename) {
         if (gltf_model.images.size() == 0) {
         } else
             for (auto &image : gltf_model.images) {
-                root_node.images.push_back(image);
+                root_node.images.emplace_back(image);
             }
     }
     if (!warn.empty()) {
@@ -412,8 +412,8 @@ Vec3ForGLSL v3_max(const Vec3ForGLSL &v1, const Vec3ForGLSL &v2,
                        std::max(v1.z, std::max(v2.z, v3.z)), 0};
 }
 
-std::vector<TriangleForGLSL> node_to_triangles(const OurNode &node) {
-    std::vector<TriangleForGLSL> triangles = {};
+std::vector<TriangleForGLSL*> node_to_triangles(const OurNode &node) {
+    std::vector<TriangleForGLSL*> triangles = {};
     for (const auto &primitive : node.primitives) {
         Vec3ForGLSL v1_transformed = transform4(node.matrix, primitive.v1);
         Vec3ForGLSL v2_transformed = transform4(node.matrix, primitive.v2);
@@ -422,24 +422,23 @@ std::vector<TriangleForGLSL> node_to_triangles(const OurNode &node) {
             v3_min(v1_transformed, v2_transformed, v3_transformed);
         Vec3ForGLSL max_transformed =
             v3_max(v1_transformed, v2_transformed, v3_transformed);
-        triangles.push_back(TriangleForGLSL{v1_transformed, v2_transformed,
+        triangles.emplace_back(new TriangleForGLSL{v1_transformed, v2_transformed,
                                             v3_transformed, min_transformed,
                                             max_transformed});
     }
     for (const auto &child : node.children) {
-        std::vector<TriangleForGLSL> new_triangles = node_to_triangles(child);
-        // print matrix
+        std::vector<TriangleForGLSL*> new_triangles = node_to_triangles(child);
         for (auto &triangle : new_triangles) {
-            triangle.v1 = transform4(node.matrix, triangle.v1);
-            triangle.v2 = transform4(node.matrix, triangle.v2);
-            triangle.v3 = transform4(node.matrix, triangle.v3);
-            triangle.min = v3_min(triangle.v1, triangle.v2, triangle.v3);
-            triangle.max = v3_max(triangle.v1, triangle.v2, triangle.v3);
+            triangle->v1 = transform4(node.matrix, triangle->v1);
+            triangle->v2 = transform4(node.matrix, triangle->v2);
+            triangle->v3 = transform4(node.matrix, triangle->v3);
+            triangle->min = v3_min(triangle->v1, triangle->v2, triangle->v3);
+            triangle->max = v3_max(triangle->v1, triangle->v2, triangle->v3);
         }
-        triangles.reserve(triangles.size() +
-                          distance(new_triangles.begin(), new_triangles.end()));
-        triangles.insert(triangles.end(), new_triangles.begin(),
-                         new_triangles.end());
+        triangles.reserve(triangles.size() + new_triangles.size());
+        triangles.insert(triangles.end(),
+                         std::make_move_iterator(new_triangles.begin()),
+                         std::make_move_iterator(new_triangles.end()));
     }
     return triangles;
 }

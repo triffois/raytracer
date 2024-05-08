@@ -11,7 +11,7 @@ set(ENABLE_MSAN OFF)
 
 project(${PROJECT})
 
-include(cmake/CompilerWarnings.cmake)
+# include(cmake/CompilerWarnings.cmake)
 
 #! Export compile_commands.json for lsps
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
