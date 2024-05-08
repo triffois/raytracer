@@ -20,53 +20,44 @@ Vec4 make_vec4(const Vec3 &vec, double w) {
 }
 
 Matrix4 make_matrix4(const std::vector<double> &vec) {
-    Matrix4 matrix{};
-    matrix.v1 = make_vec4(vec);
-    matrix.v2 = Vec4{vec[4], vec[5], vec[6], vec[7]};
-    matrix.v3 = Vec4{vec[8], vec[9], vec[10], vec[11]};
-    matrix.v4 = Vec4{vec[12], vec[13], vec[14], vec[15]};
-    return matrix;
+    return Matrix4{make_vec4(vec), Vec4{vec[4], vec[5], vec[6], vec[7]},
+                   Vec4{vec[8], vec[9], vec[10], vec[11]},
+                   Vec4{vec[12], vec[13], vec[14], vec[15]}};
 }
 
-Matrix4 mul_matrixes(Matrix4 m1, Matrix4 m2) {
-    Matrix4 result{};
-    result.v1.x = m1.v1.x * m2.v1.x + m1.v1.y * m2.v2.x + m1.v1.z * m2.v3.x +
-                  m1.v1.w * m2.v4.x;
-    result.v1.y = m1.v1.x * m2.v1.y + m1.v1.y * m2.v2.y + m1.v1.z * m2.v3.y +
-                  m1.v1.w * m2.v4.y;
-    result.v1.z = m1.v1.x * m2.v1.z + m1.v1.y * m2.v2.z + m1.v1.z * m2.v3.z +
-                  m1.v1.w * m2.v4.z;
-    result.v1.w = m1.v1.x * m2.v1.w + m1.v1.y * m2.v2.w + m1.v1.z * m2.v3.w +
-                  m1.v1.w * m2.v4.w;
-
-    result.v2.x = m1.v2.x * m2.v1.x + m1.v2.y * m2.v2.x + m1.v2.z * m2.v3.x +
-                  m1.v2.w * m2.v4.x;
-    result.v2.y = m1.v2.x * m2.v1.y + m1.v2.y * m2.v2.y + m1.v2.z * m2.v3.y +
-                  m1.v2.w * m2.v4.y;
-    result.v2.z = m1.v2.x * m2.v1.z + m1.v2.y * m2.v2.z + m1.v2.z * m2.v3.z +
-                  m1.v2.w * m2.v4.z;
-    result.v2.w = m1.v2.x * m2.v1.w + m1.v2.y * m2.v2.w + m1.v2.z * m2.v3.w +
-                  m1.v2.w * m2.v4.w;
-
-    result.v3.x = m1.v3.x * m2.v1.x + m1.v3.y * m2.v2.x + m1.v3.z * m2.v3.x +
-                  m1.v3.w * m2.v4.x;
-    result.v3.y = m1.v3.x * m2.v1.y + m1.v3.y * m2.v2.y + m1.v3.z * m2.v3.y +
-                  m1.v3.w * m2.v4.y;
-    result.v3.z = m1.v3.x * m2.v1.z + m1.v3.y * m2.v2.z + m1.v3.z * m2.v3.z +
-                  m1.v3.w * m2.v4.z;
-    result.v3.w = m1.v3.x * m2.v1.w + m1.v3.y * m2.v2.w + m1.v3.z * m2.v3.w +
-                  m1.v3.w * m2.v4.w;
-
-    result.v4.x = m1.v4.x * m2.v1.x + m1.v4.y * m2.v2.x + m1.v4.z * m2.v3.x +
-                  m1.v4.w * m2.v4.x;
-    result.v4.y = m1.v4.x * m2.v1.y + m1.v4.y * m2.v2.y + m1.v4.z * m2.v3.y +
-                  m1.v4.w * m2.v4.y;
-    result.v4.z = m1.v4.x * m2.v1.z + m1.v4.y * m2.v2.z + m1.v4.z * m2.v3.z +
-                  m1.v4.w * m2.v4.z;
-    result.v4.w = m1.v4.x * m2.v1.w + m1.v4.y * m2.v2.w + m1.v4.z * m2.v3.w +
-                  m1.v4.w * m2.v4.w;
-
-    return result;
+Matrix4 mul_matrixes(const Matrix4 &m1, const Matrix4 &m2) {
+    return Matrix4{Vec4{m1.v1.x * m2.v1.x + m1.v1.y * m2.v2.x +
+                            m1.v1.z * m2.v3.x + m1.v1.w * m2.v4.x,
+                        m1.v1.x * m2.v1.y + m1.v1.y * m2.v2.y +
+                            m1.v1.z * m2.v3.y + m1.v1.w * m2.v4.y,
+                        m1.v1.x * m2.v1.z + m1.v1.y * m2.v2.z +
+                            m1.v1.z * m2.v3.z + m1.v1.w * m2.v4.z,
+                        m1.v1.x * m2.v1.w + m1.v1.y * m2.v2.w +
+                            m1.v1.z * m2.v3.w + m1.v1.w * m2.v4.w},
+                   Vec4{m1.v2.x * m2.v1.x + m1.v2.y * m2.v2.x +
+                            m1.v2.z * m2.v3.x + m1.v2.w * m2.v4.x,
+                        m1.v2.x * m2.v1.y + m1.v2.y * m2.v2.y +
+                            m1.v2.z * m2.v3.y + m1.v2.w * m2.v4.y,
+                        m1.v2.x * m2.v1.z + m1.v2.y * m2.v2.z +
+                            m1.v2.z * m2.v3.z + m1.v2.w * m2.v4.z,
+                        m1.v2.x * m2.v1.w + m1.v2.y * m2.v2.w +
+                            m1.v2.z * m2.v3.w + m1.v2.w * m2.v4.w},
+                   Vec4{m1.v3.x * m2.v1.x + m1.v3.y * m2.v2.x +
+                            m1.v3.z * m2.v3.x + m1.v3.w * m2.v4.x,
+                        m1.v3.x * m2.v1.y + m1.v3.y * m2.v2.y +
+                            m1.v3.z * m2.v3.y + m1.v3.w * m2.v4.y,
+                        m1.v3.x * m2.v1.z + m1.v3.y * m2.v2.z +
+                            m1.v3.z * m2.v3.z + m1.v3.w * m2.v4.z,
+                        m1.v3.x * m2.v1.w + m1.v3.y * m2.v2.w +
+                            m1.v3.z * m2.v3.w + m1.v3.w * m2.v4.w},
+                   Vec4{m1.v4.x * m2.v1.x + m1.v4.y * m2.v2.x +
+                            m1.v4.z * m2.v3.x + m1.v4.w * m2.v4.x,
+                        m1.v4.x * m2.v1.y + m1.v4.y * m2.v2.y +
+                            m1.v4.z * m2.v3.y + m1.v4.w * m2.v4.y,
+                        m1.v4.x * m2.v1.z + m1.v4.y * m2.v2.z +
+                            m1.v4.z * m2.v3.z + m1.v4.w * m2.v4.z,
+                        m1.v4.x * m2.v1.w + m1.v4.y * m2.v2.w +
+                            m1.v4.z * m2.v3.w + m1.v4.w * m2.v4.w}};
 }
 
 Matrix4 compose_matrix(const Vec3 &translation, const Vec4 &rotation,
@@ -207,7 +198,6 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
     // Node contains mesh data
     if (node.mesh > -1) {
         const tinygltf::Mesh mesh = model.meshes[node.mesh];
-        std::vector<Triangle> *primitives = new std::vector<Triangle>();
 
         uint32_t index_count = 0;
         uint32_t vertex_start = static_cast<uint32_t>(vertex_buffer.size());
@@ -268,7 +258,6 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                     std::cerr << "Index component type "
                               << accessor.componentType << " not supported!"
                               << std::endl;
-                    delete primitives;
                     return;
                 }
             }
@@ -288,12 +277,10 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                     Vec3 v2 = make_vec3(&positions[index_buffer[i + 1] * 3]);
                     Vec3 v3 = make_vec3(&positions[index_buffer[i + 2] * 3]);
                     Triangle triangle{v1, v2, v3};
-                    primitives->emplace_back(triangle);
+                    new_node.primitives.emplace_back(triangle);
                 }
             }
         }
-        new_node.primitives = *primitives;
-        delete primitives;
     }
     parent->children.emplace_back(new_node);
 }
@@ -367,35 +354,25 @@ Vec3 add_vec3(const Vec3 &vec1, const Vec3 &vec2) {
 }
 
 Vec3ForGLSL transform4(const Matrix4 &matrix, const Vec3 &vector3) {
-    Vec4 result = {};
-    Vec4 vector = Vec4{vector3.x, vector3.y, vector3.z, 1.0f};
-    result.x = matrix.v1.x * vector.x + matrix.v1.y * vector.y +
-               matrix.v1.z * vector.z + matrix.v1.w * vector.w;
-    result.y = matrix.v2.x * vector.x + matrix.v2.y * vector.y +
-               matrix.v2.z * vector.z + matrix.v2.w * vector.w;
-    result.z = matrix.v3.x * vector.x + matrix.v3.y * vector.y +
-               matrix.v3.z * vector.z + matrix.v3.w * vector.w;
-    result.w = matrix.v4.x * vector.x + matrix.v4.y * vector.y +
-               matrix.v4.z * vector.z + matrix.v4.w * vector.w;
-    return Vec3ForGLSL{static_cast<float>(result.x),
-                       static_cast<float>(result.y),
-                       static_cast<float>(result.z), 0};
+    return Vec3ForGLSL{
+        static_cast<float>(matrix.v1.x * vector3.x + matrix.v1.y * vector3.y +
+                           matrix.v1.z * vector3.z + matrix.v1.w * 1.0f),
+        static_cast<float>(matrix.v2.x * vector3.x + matrix.v2.y * vector3.y +
+                           matrix.v2.z * vector3.z + matrix.v2.w * 1.0f),
+        static_cast<float>(matrix.v3.x * vector3.x + matrix.v3.y * vector3.y +
+                           matrix.v3.z * vector3.z + matrix.v3.w * 1.0f),
+        0};
 }
 
-Vec3ForGLSL transform4(const Matrix4 &matrix, const Vec3ForGLSL &vector3) {
-    Vec4 result = {};
-    Vec4 vector = Vec4{vector3.x, vector3.y, vector3.z, 1.0f};
-    result.x = matrix.v1.x * vector.x + matrix.v1.y * vector.y +
-               matrix.v1.z * vector.z + matrix.v1.w * vector.w;
-    result.y = matrix.v2.x * vector.x + matrix.v2.y * vector.y +
-               matrix.v2.z * vector.z + matrix.v2.w * vector.w;
-    result.z = matrix.v3.x * vector.x + matrix.v3.y * vector.y +
-               matrix.v3.z * vector.z + matrix.v3.w * vector.w;
-    result.w = matrix.v4.x * vector.x + matrix.v4.y * vector.y +
-               matrix.v4.z * vector.z + matrix.v4.w * vector.w;
-    return Vec3ForGLSL{static_cast<float>(result.x),
-                       static_cast<float>(result.y),
-                       static_cast<float>(result.z), 0};
+Vec3ForGLSL transform4(const Matrix4 &matrix, const Vec3ForGLSL &vector) {
+    return Vec3ForGLSL{
+        static_cast<float>(matrix.v1.x * vector.x + matrix.v1.y * vector.y +
+                           matrix.v1.z * vector.z + matrix.v1.w * 1.0f),
+        static_cast<float>(matrix.v2.x * vector.x + matrix.v2.y * vector.y +
+                           matrix.v2.z * vector.z + matrix.v2.w * 1.0f),
+        static_cast<float>(matrix.v3.x * vector.x + matrix.v3.y * vector.y +
+                           matrix.v3.z * vector.z + matrix.v3.w * 1.0f),
+        0};
 }
 
 Vec3ForGLSL v3_min(const Vec3ForGLSL &v1, const Vec3ForGLSL &v2,
@@ -412,8 +389,8 @@ Vec3ForGLSL v3_max(const Vec3ForGLSL &v1, const Vec3ForGLSL &v2,
                        std::max(v1.z, std::max(v2.z, v3.z)), 0};
 }
 
-std::vector<TriangleForGLSL*> node_to_triangles(const OurNode &node) {
-    std::vector<TriangleForGLSL*> triangles = {};
+std::vector<TriangleForGLSL *> node_to_triangles(const OurNode &node) {
+    std::vector<TriangleForGLSL *> triangles = {};
     for (const auto &primitive : node.primitives) {
         Vec3ForGLSL v1_transformed = transform4(node.matrix, primitive.v1);
         Vec3ForGLSL v2_transformed = transform4(node.matrix, primitive.v2);
@@ -422,12 +399,12 @@ std::vector<TriangleForGLSL*> node_to_triangles(const OurNode &node) {
             v3_min(v1_transformed, v2_transformed, v3_transformed);
         Vec3ForGLSL max_transformed =
             v3_max(v1_transformed, v2_transformed, v3_transformed);
-        triangles.emplace_back(new TriangleForGLSL{v1_transformed, v2_transformed,
-                                            v3_transformed, min_transformed,
-                                            max_transformed});
+        triangles.emplace_back(
+            new TriangleForGLSL{v1_transformed, v2_transformed, v3_transformed,
+                                min_transformed, max_transformed});
     }
     for (const auto &child : node.children) {
-        std::vector<TriangleForGLSL*> new_triangles = node_to_triangles(child);
+        std::vector<TriangleForGLSL *> new_triangles = node_to_triangles(child);
         for (auto &triangle : new_triangles) {
             triangle->v1 = transform4(node.matrix, triangle->v1);
             triangle->v2 = transform4(node.matrix, triangle->v2);
