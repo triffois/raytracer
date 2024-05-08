@@ -268,6 +268,7 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                     std::cerr << "Index component type "
                               << accessor.componentType << " not supported!"
                               << std::endl;
+                    delete primitives;
                     return;
                 }
             }
@@ -292,6 +293,7 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
             }
         }
         new_node.primitives = *primitives;
+        delete primitives;
     }
     parent->children.push_back(new_node);
 }
