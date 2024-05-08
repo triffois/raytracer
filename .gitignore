@@ -24,3 +24,5 @@ _deps
 build/
 cmake-build-*/
 .cache
+lib64
+compile.log
