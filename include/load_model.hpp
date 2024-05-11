@@ -39,6 +39,11 @@ struct Triangle {
     Vec2 uv2;
     Vec2 uv3;
     uint32_t texture_id;
+    uint32_t metallic_roughness_texture_id;
+    double metallic_factor;
+    double roughness_factor;
+    double alpha_cutoff;
+    bool double_sided;
 };
 
 struct Vec2ForGLSL {
@@ -66,11 +71,18 @@ struct TriangleForGLSL {
     Vec3ForGLSL v3;
     Vec3ForGLSL min;
     Vec3ForGLSL max;
+
     Vec2ForGLSL uv1;
     Vec2ForGLSL uv2;
+
     Vec2ForGLSL uv3;
     uint32_t texture_id;
-    float padding;
+    uint32_t metallic_roughness_texture_id;
+
+    float metallic_factor;
+    float roughness_factor;
+    float alpha_cutoff;
+    uint32_t double_sided;
 };
 
 

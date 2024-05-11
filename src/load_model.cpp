@@ -313,8 +313,13 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                     Vec2 uv1;
                     Vec2 uv2;
                     Vec2 uv3;
-                    uint32_t texture_id;
-                    Vec3 uv_part2;
+                    uint32_t texture_id = std::numeric_limits<uint32_t>::max();
+                    uint32_t metallic_roughness_texture_id =
+                        std::numeric_limits<uint32_t>::max();
+                    double metallic_factor = 0.0;
+                    double roughness_factor = 0.0;
+                    double alpha_cutoff = 0.0;
+                    bool double_sided = false;
                     if (texture_coords != nullptr) {
                         uv1 = Vec2{texture_coords[index_buffer[i] * 2],
                                    texture_coords[index_buffer[i] * 2 + 1]};
@@ -324,38 +329,35 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                             texture_coords[index_buffer[i + 2] * 2],
                             texture_coords[index_buffer[i + 2] * 2 + 1],
                         };
-                        // texture_id = find_texture(
-                        //     &model.textures[model.materials[primitive.material]
-                        //                         .additionalValues
-                        //                         .at("emissiveTexture")
-                        //                         .TextureIndex()],
-                        //     model);
-                        if (static_cast<size_t>(primitive.material) >=
-                            model.materials.size()) {
-                            texture_id = std::numeric_limits<uint32_t>::max();
-                        } else {
-                            auto materials =
-                                model.materials[primitive.material].values;
-                            if (materials.find("baseColorTexture") !=
-                                materials.end()) {
-                                size_t index = materials.at("baseColorTexture")
-                                                   .TextureIndex();
-                                if (index >= model.textures.size()) {
-                                    texture_id =
-                                        std::numeric_limits<uint32_t>::max();
-                                } else {
-                                    texture_id = find_texture(
-                                        &model.textures[index], model);
-                                }
-                            } else {
-                                texture_id =
-                                    std::numeric_limits<uint32_t>::max();
-                            }
-                        }
-                    } else {
-                        texture_id = std::numeric_limits<uint32_t>::max();
+                        texture_id =
+                            model.materials[primitive.material]
+                                .pbrMetallicRoughness.baseColorTexture.index;
+                        metallic_roughness_texture_id =
+                            model.materials[primitive.material]
+                                .pbrMetallicRoughness.metallicRoughnessTexture
+                                .index;
                     }
-                    Triangle triangle{v1, v2, v3, uv1, uv2, uv3, texture_id};
+                    metallic_factor = model.materials[primitive.material]
+                                          .pbrMetallicRoughness.metallicFactor;
+                    roughness_factor =
+                        model.materials[primitive.material]
+                            .pbrMetallicRoughness.roughnessFactor;
+                    alpha_cutoff =
+                        model.materials[primitive.material].alphaCutoff;
+                    double_sided =
+                        model.materials[primitive.material].doubleSided;
+                    Triangle triangle{v1,
+                                      v2,
+                                      v3,
+                                      uv1,
+                                      uv2,
+                                      uv3,
+                                      texture_id,
+                                      metallic_roughness_texture_id,
+                                      metallic_factor,
+                                      roughness_factor,
+                                      alpha_cutoff,
+                                      double_sided};
                     new_node.primitives.emplace_back(triangle);
                 }
             }
@@ -484,9 +486,18 @@ std::vector<TriangleForGLSL *> node_to_triangles(const OurNode &node) {
                                       static_cast<float>(primitive.uv2.y)};
         Vec2ForGLSL uv3 = Vec2ForGLSL{static_cast<float>(primitive.uv3.x),
                                       static_cast<float>(primitive.uv3.y)};
+        uint32_t texture_id = primitive.texture_id;
+        uint32_t metallic_roughness_texture_id =
+            primitive.metallic_roughness_texture_id;
+        float metallic_factor = static_cast<float>(primitive.metallic_factor);
+        float roughness_factor = static_cast<float>(primitive.roughness_factor);
+        float alpha_cutoff = static_cast<float>(primitive.alpha_cutoff);
+        uint32_t double_sided = static_cast<uint32_t>(primitive.double_sided);
         triangles.emplace_back(new TriangleForGLSL{
             v1_transformed, v2_transformed, v3_transformed, min_transformed,
-            max_transformed, uv1, uv2, uv3, primitive.texture_id, 0.0f});
+            max_transformed, uv1, uv2, uv3, texture_id,
+            metallic_roughness_texture_id, metallic_factor, roughness_factor,
+            alpha_cutoff, double_sided});
     }
     for (const auto &child : node.children) {
         std::vector<TriangleForGLSL *> new_triangles = node_to_triangles(child);
