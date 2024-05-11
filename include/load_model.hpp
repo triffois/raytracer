@@ -6,6 +6,11 @@
 
 #include "./tiny_gltf.h"
 
+struct Vec2 {
+    double x;
+    double y;
+};
+
 struct Vec3 {
     double x;
     double y;
@@ -30,6 +35,15 @@ struct Triangle {
     Vec3 v1;
     Vec3 v2;
     Vec3 v3;
+    Vec2 uv1;
+    Vec2 uv2;
+    Vec2 uv3;
+    uint32_t texture_id;
+};
+
+struct Vec2ForGLSL {
+    float x;
+    float y;
 };
 
 struct Vec3ForGLSL {
@@ -39,12 +53,24 @@ struct Vec3ForGLSL {
     float padding;
 };
 
+struct StrangeVec4ForGLSL {
+    float x;
+    float y;
+    float z;
+    uint32_t texture_id;
+};
+
 struct TriangleForGLSL {
     Vec3ForGLSL v1;
     Vec3ForGLSL v2;
     Vec3ForGLSL v3;
     Vec3ForGLSL min;
     Vec3ForGLSL max;
+    Vec2ForGLSL uv1;
+    Vec2ForGLSL uv2;
+    Vec2ForGLSL uv3;
+    uint32_t texture_id;
+    float padding;
 };
 
 

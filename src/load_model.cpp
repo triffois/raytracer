@@ -160,6 +160,27 @@ void print_node(const OurNode &node, size_t depth) {
     }
 }
 
+uint32_t find_texture(const tinygltf::Texture *tex,
+                      const tinygltf::Model &model) {
+    if (tex == nullptr) {
+        return 0;
+    }
+
+    if (tex->name.empty()) {
+        return 0;
+    }
+
+    uint32_t res = -1;
+    for (const auto &texture : model.textures) {
+        res++;
+        if (tex->name == texture.name) {
+            return res;
+        }
+    }
+
+    return res;
+}
+
 void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                const tinygltf::Model &model,
                std::vector<uint32_t> &index_buffer,
@@ -265,18 +286,61 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                 const tinygltf::Accessor &accessor =
                     model.accessors[primitive.attributes.find("POSITION")
                                         ->second];
+
                 const tinygltf::BufferView &buffer_view =
                     model.bufferViews[accessor.bufferView];
                 const tinygltf::Buffer &buffer =
                     model.buffers[buffer_view.buffer];
                 const float *positions = reinterpret_cast<const float *>(
                     &buffer.data[buffer_view.byteOffset + accessor.byteOffset]);
-                // print indexBuffer
+                const float *texture_coords = nullptr;
+                if (primitive.attributes.find("TEXCOORD_0") !=
+                    primitive.attributes.end()) {
+                    const tinygltf::Accessor &uv_accessor =
+                        model.accessors[primitive.attributes.find("TEXCOORD_0")
+                                            ->second];
+                    const tinygltf::BufferView &uvView =
+                        model.bufferViews[uv_accessor.bufferView];
+                    texture_coords = reinterpret_cast<const float *>(&(
+                        model.buffers[uvView.buffer]
+                            .data[uv_accessor.byteOffset + uvView.byteOffset]));
+                }
                 for (size_t i = 0; i < index_count; i += 3) {
                     Vec3 v1 = make_vec3(&positions[index_buffer[i] * 3]);
                     Vec3 v2 = make_vec3(&positions[index_buffer[i + 1] * 3]);
                     Vec3 v3 = make_vec3(&positions[index_buffer[i + 2] * 3]);
-                    Triangle triangle{v1, v2, v3};
+                    Vec2 uv1;
+                    Vec2 uv2;
+                    Vec2 uv3;
+                    uint32_t texture_id;
+                    Vec3 uv_part2;
+                    if (texture_coords != nullptr) {
+                        uv1 = Vec2{positions[index_buffer[i] * 2],
+                                        positions[index_buffer[i] * 2 + 1]};
+                        uv2 = Vec2{positions[index_buffer[i + 1] * 2], positions[index_buffer[i + 1] * 2 + 1]};
+                        // texture_id = find_texture(
+                        //     &model.textures[model.materials[primitive.material]
+                        //                         .additionalValues
+                        //                         .at("emissiveTexture")
+                        //                         .TextureIndex()],
+                        //     model);
+                        texture_id = find_texture(
+                            &model.textures[model.materials[primitive.material]
+                                                .values.at("baseColorTexture")
+                                                .TextureIndex()],
+                            model);
+                        uv3 = Vec2{
+                            positions[index_buffer[i + 2] * 2],
+                            positions[index_buffer[i + 2] * 2 + 1],
+                        };
+                    } else {
+                        uv1 = Vec2{0.0f, 0.0f};
+                        uv2 = Vec2{0.0f, 0.0f};
+                        uv3 = Vec2{0.0f, 0.0f};
+                        texture_id = std::numeric_limits<uint32_t>::max();
+                    }
+                    Triangle triangle{v1,       v2,         v3,
+                                      uv1, uv2, uv3, texture_id};
                     new_node.primitives.emplace_back(triangle);
                 }
             }
@@ -399,9 +463,15 @@ std::vector<TriangleForGLSL *> node_to_triangles(const OurNode &node) {
             v3_min(v1_transformed, v2_transformed, v3_transformed);
         Vec3ForGLSL max_transformed =
             v3_max(v1_transformed, v2_transformed, v3_transformed);
-        triangles.emplace_back(
-            new TriangleForGLSL{v1_transformed, v2_transformed, v3_transformed,
-                                min_transformed, max_transformed});
+        Vec2ForGLSL uv1 = Vec2ForGLSL{static_cast<float>(primitive.uv1.x),
+                        static_cast<float>(primitive.uv1.y)};
+        Vec2ForGLSL uv2 = Vec2ForGLSL{static_cast<float>(primitive.uv2.x),
+                        static_cast<float>(primitive.uv2.y)};
+        Vec2ForGLSL uv3 = Vec2ForGLSL{static_cast<float>(primitive.uv3.x),
+                        static_cast<float>(primitive.uv3.y)};
+        triangles.emplace_back(new TriangleForGLSL{
+            v1_transformed, v2_transformed, v3_transformed, min_transformed,
+            max_transformed, uv1, uv2, uv3, primitive.texture_id, 0.0f});
     }
     for (const auto &child : node.children) {
         std::vector<TriangleForGLSL *> new_triangles = node_to_triangles(child);

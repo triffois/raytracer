@@ -118,6 +118,8 @@ void print_box(std::vector<Box> boxes, int box_id, size_t depth,
         print_triangle(Triangle{
             Vec3{triangles[i]->v1.x, triangles[i]->v1.y, triangles[i]->v1.z},
             Vec3{triangles[i]->v2.x, triangles[i]->v2.y, triangles[i]->v2.z},
-            Vec3{triangles[i]->v3.x, triangles[i]->v3.y, triangles[i]->v3.z}});
+            Vec3{triangles[i]->v3.x, triangles[i]->v3.y, triangles[i]->v3.z},
+            Vec2{0.0f, 0.0f}, Vec2{0.0f, 0.0f}, Vec2{0.0f, 0.0f},
+            std::numeric_limits<uint32_t>::max()});
     }
 }
