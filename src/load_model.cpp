@@ -315,10 +315,10 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                     uint32_t texture_id;
                     Vec3 uv_part2;
                     if (texture_coords != nullptr) {
-                        uv1 = Vec2{positions[index_buffer[i] * 2],
-                                   positions[index_buffer[i] * 2 + 1]};
-                        uv2 = Vec2{positions[index_buffer[i + 1] * 2],
-                                   positions[index_buffer[i + 1] * 2 + 1]};
+                        uv1 = Vec2{texture_coords[index_buffer[i] * 2],
+                                   texture_coords[index_buffer[i] * 2 + 1]};
+                        uv2 = Vec2{texture_coords[index_buffer[i + 1] * 2],
+                                   texture_coords[index_buffer[i + 1] * 2 + 1]};
                         // texture_id = find_texture(
                         //     &model.textures[model.materials[primitive.material]
                         //                         .additionalValues
