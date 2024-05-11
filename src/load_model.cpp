@@ -299,11 +299,12 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                     const tinygltf::Accessor &uv_accessor =
                         model.accessors[primitive.attributes.find("TEXCOORD_0")
                                             ->second];
-                    const tinygltf::BufferView &uvView =
+                    const tinygltf::BufferView &uv_view =
                         model.bufferViews[uv_accessor.bufferView];
-                    texture_coords = reinterpret_cast<const float *>(&(
-                        model.buffers[uvView.buffer]
-                            .data[uv_accessor.byteOffset + uvView.byteOffset]));
+                    texture_coords = reinterpret_cast<const float *>(
+                        &(model.buffers[uv_view.buffer]
+                              .data[uv_accessor.byteOffset +
+                                    uv_view.byteOffset]));
                 }
                 for (size_t i = 0; i < index_count; i += 3) {
                     Vec3 v1 = make_vec3(&positions[index_buffer[i] * 3]);
@@ -319,6 +320,10 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                                    texture_coords[index_buffer[i] * 2 + 1]};
                         uv2 = Vec2{texture_coords[index_buffer[i + 1] * 2],
                                    texture_coords[index_buffer[i + 1] * 2 + 1]};
+                        uv3 = Vec2{
+                            texture_coords[index_buffer[i + 2] * 2],
+                            texture_coords[index_buffer[i + 2] * 2 + 1],
+                        };
                         // texture_id = find_texture(
                         //     &model.textures[model.materials[primitive.material]
                         //                         .additionalValues
@@ -347,10 +352,6 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                                     std::numeric_limits<uint32_t>::max();
                             }
                         }
-                        uv3 = Vec2{
-                            positions[index_buffer[i + 2] * 2],
-                            positions[index_buffer[i + 2] * 2 + 1],
-                        };
                     } else {
                         texture_id = std::numeric_limits<uint32_t>::max();
                     }
