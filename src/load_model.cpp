@@ -316,31 +316,45 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                     Vec3 uv_part2;
                     if (texture_coords != nullptr) {
                         uv1 = Vec2{positions[index_buffer[i] * 2],
-                                        positions[index_buffer[i] * 2 + 1]};
-                        uv2 = Vec2{positions[index_buffer[i + 1] * 2], positions[index_buffer[i + 1] * 2 + 1]};
+                                   positions[index_buffer[i] * 2 + 1]};
+                        uv2 = Vec2{positions[index_buffer[i + 1] * 2],
+                                   positions[index_buffer[i + 1] * 2 + 1]};
                         // texture_id = find_texture(
                         //     &model.textures[model.materials[primitive.material]
                         //                         .additionalValues
                         //                         .at("emissiveTexture")
                         //                         .TextureIndex()],
                         //     model);
-                        texture_id = find_texture(
-                            &model.textures[model.materials[primitive.material]
-                                                .values.at("baseColorTexture")
-                                                .TextureIndex()],
-                            model);
+                        if (static_cast<size_t>(primitive.material) >=
+                            model.materials.size()) {
+                            texture_id = std::numeric_limits<uint32_t>::max();
+                        } else {
+                            auto materials =
+                                model.materials[primitive.material].values;
+                            if (materials.find("baseColorTexture") !=
+                                materials.end()) {
+                                size_t index = materials.at("baseColorTexture")
+                                                   .TextureIndex();
+                                if (index >= model.textures.size()) {
+                                    texture_id =
+                                        std::numeric_limits<uint32_t>::max();
+                                } else {
+                                    texture_id = find_texture(
+                                        &model.textures[index], model);
+                                }
+                            } else {
+                                texture_id =
+                                    std::numeric_limits<uint32_t>::max();
+                            }
+                        }
                         uv3 = Vec2{
                             positions[index_buffer[i + 2] * 2],
                             positions[index_buffer[i + 2] * 2 + 1],
                         };
                     } else {
-                        uv1 = Vec2{0.0f, 0.0f};
-                        uv2 = Vec2{0.0f, 0.0f};
-                        uv3 = Vec2{0.0f, 0.0f};
                         texture_id = std::numeric_limits<uint32_t>::max();
                     }
-                    Triangle triangle{v1,       v2,         v3,
-                                      uv1, uv2, uv3, texture_id};
+                    Triangle triangle{v1, v2, v3, uv1, uv2, uv3, texture_id};
                     new_node.primitives.emplace_back(triangle);
                 }
             }
@@ -464,11 +478,11 @@ std::vector<TriangleForGLSL *> node_to_triangles(const OurNode &node) {
         Vec3ForGLSL max_transformed =
             v3_max(v1_transformed, v2_transformed, v3_transformed);
         Vec2ForGLSL uv1 = Vec2ForGLSL{static_cast<float>(primitive.uv1.x),
-                        static_cast<float>(primitive.uv1.y)};
+                                      static_cast<float>(primitive.uv1.y)};
         Vec2ForGLSL uv2 = Vec2ForGLSL{static_cast<float>(primitive.uv2.x),
-                        static_cast<float>(primitive.uv2.y)};
+                                      static_cast<float>(primitive.uv2.y)};
         Vec2ForGLSL uv3 = Vec2ForGLSL{static_cast<float>(primitive.uv3.x),
-                        static_cast<float>(primitive.uv3.y)};
+                                      static_cast<float>(primitive.uv3.y)};
         triangles.emplace_back(new TriangleForGLSL{
             v1_transformed, v2_transformed, v3_transformed, min_transformed,
             max_transformed, uv1, uv2, uv3, primitive.texture_id, 0.0f});
