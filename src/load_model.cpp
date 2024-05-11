@@ -316,36 +316,41 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                     uint32_t texture_id = std::numeric_limits<uint32_t>::max();
                     uint32_t metallic_roughness_texture_id =
                         std::numeric_limits<uint32_t>::max();
-                    double metallic_factor = 0.0;
-                    double roughness_factor = 0.0;
-                    double alpha_cutoff = 0.0;
-                    bool double_sided = false;
-                    if (texture_coords != nullptr) {
-                        uv1 = Vec2{texture_coords[index_buffer[i] * 2],
-                                   texture_coords[index_buffer[i] * 2 + 1]};
-                        uv2 = Vec2{texture_coords[index_buffer[i + 1] * 2],
-                                   texture_coords[index_buffer[i + 1] * 2 + 1]};
-                        uv3 = Vec2{
-                            texture_coords[index_buffer[i + 2] * 2],
-                            texture_coords[index_buffer[i + 2] * 2 + 1],
-                        };
-                        texture_id =
+                    double metallic_factor = 0.5;
+                    double roughness_factor = 0.5;
+                    double alpha_cutoff = 0.5;
+                    bool double_sided = true;
+                    if (static_cast<size_t>(primitive.material) <
+                        model.materials.size()) {
+                        if (texture_coords != nullptr) {
+                            uv1 = Vec2{texture_coords[index_buffer[i] * 2],
+                                       texture_coords[index_buffer[i] * 2 + 1]};
+                            uv2 = Vec2{
+                                texture_coords[index_buffer[i + 1] * 2],
+                                texture_coords[index_buffer[i + 1] * 2 + 1]};
+                            uv3 = Vec2{
+                                texture_coords[index_buffer[i + 2] * 2],
+                                texture_coords[index_buffer[i + 2] * 2 + 1],
+                            };
+                            texture_id = model.materials[primitive.material]
+                                             .pbrMetallicRoughness
+                                             .baseColorTexture.index;
+                            metallic_roughness_texture_id =
+                                model.materials[primitive.material]
+                                    .pbrMetallicRoughness
+                                    .metallicRoughnessTexture.index;
+                        }
+                        metallic_factor =
                             model.materials[primitive.material]
-                                .pbrMetallicRoughness.baseColorTexture.index;
-                        metallic_roughness_texture_id =
+                                .pbrMetallicRoughness.metallicFactor;
+                        roughness_factor =
                             model.materials[primitive.material]
-                                .pbrMetallicRoughness.metallicRoughnessTexture
-                                .index;
+                                .pbrMetallicRoughness.roughnessFactor;
+                        alpha_cutoff =
+                            model.materials[primitive.material].alphaCutoff;
+                        double_sided =
+                            model.materials[primitive.material].doubleSided;
                     }
-                    metallic_factor = model.materials[primitive.material]
-                                          .pbrMetallicRoughness.metallicFactor;
-                    roughness_factor =
-                        model.materials[primitive.material]
-                            .pbrMetallicRoughness.roughnessFactor;
-                    alpha_cutoff =
-                        model.materials[primitive.material].alphaCutoff;
-                    double_sided =
-                        model.materials[primitive.material].doubleSided;
                     Triangle triangle{v1,
                                       v2,
                                       v3,
