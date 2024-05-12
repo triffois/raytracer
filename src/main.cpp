@@ -191,16 +191,28 @@ int main(int argc, char *argv[]) {
 #ifdef DEBUG_PRINT
     auto start_texture = std::chrono::high_resolution_clock::now();
 #endif
-    GLuint *texture_data = new GLuint[textures.size()];
-    glGenTextures(textures.size(), texture_data);
-
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA32F, textures[0].height, textures[0].width,
+                    textures.size());
     for (size_t i = 0; i < textures.size(); ++i) {
-        glBindTexture(GL_TEXTURE_2D, texture_data[i]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textures[i].width,
-                     textures[i].height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                     textures[i].image.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, textures[i].width,
+                        textures[i].height, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+                        textures[i].image.data());
+                        std::cout << "Texture " << i << " size: " << textures[i].width << "x" << textures[i].height << std::endl;
     }
+    glTexParameteri(GL_TEXTURE_2D_ARRAY,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+    // for (size_t i = 0; i < textures.size(); ++i) {
+    //     glBindTexture(GL_TEXTURE_2D, texture_data[i]);
+    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textures[i].width,
+    //                  textures[i].height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+    //                  textures[i].image.data());
+    //     glGenerateMipmap(GL_TEXTURE_2D);
+    // }
 #ifdef DEBUG_PRINT
     auto end_texture = std::chrono::high_resolution_clock::now();
     std::cout << "Texture loading into opengl took "
@@ -343,7 +355,6 @@ int main(int argc, char *argv[]) {
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
-    delete[] texture_data;
     delete aabb;
     return 0;
 }
