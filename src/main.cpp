@@ -31,7 +31,8 @@ const char *vertex_shader_source =
     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
     "}\0";
 
-const char *read_shader(std::string filename) {
+const char *read_shader(std::string filename)
+{
     std::ifstream file(filename);
     std::string shader((std::istreambuf_iterator<char>(file)),
                        std::istreambuf_iterator<char>());
@@ -40,8 +41,10 @@ const char *read_shader(std::string filename) {
     return cstr;
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 2) {
+int main(int argc, char *argv[])
+{
+    if (argc < 2)
+    {
         std::cout << "Usage: " << argv[0]
                   << " <shader file> [<gltf_file>...] [<glb_file>...]"
                   << std::endl;
@@ -53,7 +56,8 @@ int main(int argc, char *argv[]) {
 #ifdef DEBUG_PRINT
     auto start_model = std::chrono::high_resolution_clock::now();
 #endif
-    for (int i = 2; i < argc; ++i) {
+    for (int i = 2; i < argc; ++i)
+    {
         std::string path = argv[i];
         OurNode model = load_model(path);
         std::vector<TriangleForGLSL *> new_triangles = node_to_triangles(model);
@@ -61,7 +65,8 @@ int main(int argc, char *argv[]) {
         triangles.insert(triangles.end(),
                          std::make_move_iterator(new_triangles.begin()),
                          std::make_move_iterator(new_triangles.end()));
-        for (size_t j = 0; j < model.images.size(); ++j) {
+        for (size_t j = 0; j < model.images.size(); ++j)
+        {
             textures.emplace_back(model.images[j]);
         }
     }
@@ -76,7 +81,8 @@ int main(int argc, char *argv[]) {
 
 #ifdef DEBUG_PRINT_EXTENDED
     std::cout << "[" << std::endl;
-    for (auto &t : triangles) {
+    for (auto &t : triangles)
+    {
         std::cout << "  ";
         Triangle triangle =
             Triangle{Vec3{t.v1.x, t.v1.y, t.v1.z}, Vec3{t.v2.x, t.v2.y, t.v2.z},
@@ -118,7 +124,8 @@ int main(int argc, char *argv[]) {
     // --------------------
     GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT,
                                           "MYOWNRAYTRACER!!!", NULL, NULL);
-    if (window == NULL) {
+    if (window == NULL)
+    {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
@@ -128,7 +135,8 @@ int main(int argc, char *argv[]) {
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
@@ -143,7 +151,8 @@ int main(int argc, char *argv[]) {
     int success;
     char info_log[512];
     glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         glGetShaderInfoLog(vertex_shader, 512, NULL, info_log);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
                   << info_log << std::endl;
@@ -158,7 +167,8 @@ int main(int argc, char *argv[]) {
     glCompileShader(fragment_shader);
     // check for shader compile errors
     glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         glGetShaderInfoLog(fragment_shader, 512, NULL, info_log);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
                   << info_log << std::endl;
@@ -178,7 +188,8 @@ int main(int argc, char *argv[]) {
     glLinkProgram(shader_program);
     // check for linking errors
     glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         glGetProgramInfoLog(shader_program, 512, NULL, info_log);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
                   << info_log << std::endl;
@@ -191,37 +202,46 @@ int main(int argc, char *argv[]) {
 #ifdef DEBUG_PRINT
     auto start_texture = std::chrono::high_resolution_clock::now();
 #endif
-    if(textures.size() != 0) {
-         GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
-    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA32F, textures[0].height, textures[0].width,
-                    textures.size());
-    int max_h;
-    int max_w;
-    std::vector<float> indexes;
-    // for(int i = 0; i < textures.size(); i++) {
-    //     if(textures[i].height > max_h) {
-    //     }
-    // }
-    // for(auto t : textures) {
-    //     if(t.height < max_h) {
-    //         t.image.resize(max_h * max_w * 4);
-    //     }
-    //     if(t.width < max_w) {
-    //         t.image.resize(max_h * max_w * 4);
-    //     }
-    // }
-    for (size_t i = 0; i < textures.size(); ++i) {
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, textures[i].width,
-                        textures[i].height, 1, GL_RGBA, GL_UNSIGNED_BYTE,
-                        textures[i].image.data());
-                        std::cout << "Texture " << i << " size: " << textures[i].width << "x" << textures[i].height << std::endl;
-    }
-    glTexParameteri(GL_TEXTURE_2D_ARRAY,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+    if (textures.size() != 0)
+    {
+        float max_h;
+        float max_w;
+        std::vector<Vec2> ratios;
+        for (int i = 0; i < textures.size(); i++)
+        {
+            if (textures[i].height > max_h)
+            {
+                max_h = textures[i].height;
+            }
+            if (textures[i].width > max_w)
+            {
+                max_w = textures[i].width;
+            }
+        }
+        float ratio = max_h / max_w;
+        Vec2 temp;
+        for (int i = 0; i < textures.size(); i++)
+        {
+            temp.x = textures[i].width / max_w;
+            temp.y = textures[i].height / max_h;
+            ratios.push_back(temp);
+        }
+        GLuint texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA32F, max_h, max_w,
+                       textures.size());
+        for (size_t i = 0; i < textures.size(); ++i)
+        {
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, textures[i].width,
+                            textures[i].height, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+                            textures[i].image.data());
+            std::cout << "Texture " << i << " size: " << textures[i].width << "x" << textures[i].height << std::endl;
+        }
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 
 #ifdef DEBUG_PRINT
@@ -236,7 +256,15 @@ int main(int argc, char *argv[]) {
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     float vertices[] = {
-        -1.0f, -1.0f, 0.0f, -1.0f, 3.0f, 0.0f, 3.0f, -1.0f, 0.0f,
+        -1.0f,
+        -1.0f,
+        0.0f,
+        -1.0f,
+        3.0f,
+        0.0f,
+        3.0f,
+        -1.0f,
+        0.0f,
     };
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
@@ -273,10 +301,12 @@ int main(int argc, char *argv[]) {
     // triangles
     // copy triangles to array
     TriangleForGLSL *triangle_array = new TriangleForGLSL[triangles.size()];
-    for (size_t i = 0; i < triangles.size(); ++i) {
+    for (size_t i = 0; i < triangles.size(); ++i)
+    {
         triangle_array[i] = *triangles[i];
     }
-    for (auto t : triangles) {
+    for (auto t : triangles)
+    {
         delete t;
     }
 #ifdef DEBUG_PRINT
@@ -304,7 +334,8 @@ int main(int argc, char *argv[]) {
                      .count()
               << "ms" << std::endl;
 #endif
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         // input
         // -----
         process_input(window);
@@ -373,7 +404,8 @@ int main(int argc, char *argv[]) {
 // process all input: query GLFW whether relevant keys are pressed/released this
 // frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void process_input(GLFWwindow *window) {
+void process_input(GLFWwindow *window)
+{
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
@@ -381,7 +413,8 @@ void process_input(GLFWwindow *window) {
 // glfw: whenever the window size changed (by OS or user resize) this callback
 // function executes
 // ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
     // make sure the viewport matches the new window dimensions; note that width
     // and height will be significantly larger than specified on retina
     // displays.
