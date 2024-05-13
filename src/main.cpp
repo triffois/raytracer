@@ -208,6 +208,7 @@ int main(int argc, char *argv[])
     if (textures.size() != 0)
     {
         float max_h;
+
         float max_w;
         std::vector<Vec2> ratios;
         for (int i = 0; i < textures.size(); i++)
@@ -245,6 +246,18 @@ int main(int argc, char *argv[])
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        if(ratios.size()%2 != 0){
+            temp.x = 1;
+            temp.y = 1;
+            ratios.push_back(temp);
+            }
+        GLuint tex_ratios;
+        glGenBuffers(1, &tex_ratios);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, tex_ratios);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, ratios.size() * sizeof(Vec2),
+                     ratios.data(), GL_DYNAMIC_COPY);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, tex_ratios);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
 #ifdef DEBUG_PRINT
