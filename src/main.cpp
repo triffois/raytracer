@@ -88,8 +88,8 @@ int main(int argc, char *argv[])
     {
         std::cout << "  ";
         Triangle triangle =
-            Triangle{Vec3{t.v1.x, t.v1.y, t.v1.z}, Vec3{t.v2.x, t.v2.y, t.v2.z},
-                     Vec3{t.v3.x, t.v3.y, t.v3.z}};
+            Triangle{Vec3{t->v1.x, t->v1.y, t->v1.z}, Vec3{t->v2.x, t->v2.y, t->v2.z},
+                     Vec3{t->v3.x, t->v3.y, t->v3.z}};
         print_triangle(triangle);
     }
     std::cout << "]" << std::endl;

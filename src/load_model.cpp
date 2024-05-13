@@ -220,14 +220,44 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
     if (node.mesh > -1) {
         const tinygltf::Mesh mesh = model.meshes[node.mesh];
 
-        uint32_t index_count = 0;
-        uint32_t vertex_start = static_cast<uint32_t>(vertex_buffer.size());
-
         for (const auto &primitive : mesh.primitives) {
+            if (primitive.mode != TINYGLTF_MODE_TRIANGLES) {
+                std::cout << "Warning: primitive.mode is not triangles"
+                          << std::endl;
+                continue;
+            }
             if (primitive.indices == -1) {
                 std::cout << "Warning: primitive.indices == -1; skipping"
                           << std::endl;
                 continue;
+            }
+            uint32_t index_count = 0;
+            uint32_t vertex_count = 0;
+            uint32_t vertex_start = static_cast<uint32_t>(vertex_buffer.size());
+            uint32_t index_start = static_cast<uint32_t>(index_buffer.size());
+            {
+                const tinygltf::Accessor &accessor =
+                    model.accessors[primitive.attributes.at("POSITION")];
+
+                vertex_count = static_cast<uint32_t>(accessor.count);
+
+                const tinygltf::BufferView &buffer_view =
+                    model.bufferViews[accessor.bufferView];
+                const tinygltf::Buffer &buffer =
+                    model.buffers[buffer_view.buffer];
+                const float *positions = reinterpret_cast<const float *>(
+                    &buffer.data[buffer_view.byteOffset + accessor.byteOffset]);
+                for (size_t i = 0; i < accessor.count; ++i) {
+                    // Positions are Vec3 components, so for each vec3 stride,
+                    // offset for x, y, and z.
+                    // std::cout << "(" << positions[i * 3 + 0] << ", " // x
+                    //           << positions[i * 3 + 1] << ", "        // y
+                    //           << positions[i * 3 + 2] << ")"         // z
+                    //           << "\n";
+                    Vec3 v = Vec3{positions[i * 3 + 0], positions[i * 3 + 1],
+                                  positions[i * 3 + 2]};
+                    vertex_buffer.emplace_back(v);
+                }
             }
             {
                 const tinygltf::Accessor &accessor =
@@ -283,16 +313,6 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                 }
             }
             {
-                const tinygltf::Accessor &accessor =
-                    model.accessors[primitive.attributes.find("POSITION")
-                                        ->second];
-
-                const tinygltf::BufferView &buffer_view =
-                    model.bufferViews[accessor.bufferView];
-                const tinygltf::Buffer &buffer =
-                    model.buffers[buffer_view.buffer];
-                const float *positions = reinterpret_cast<const float *>(
-                    &buffer.data[buffer_view.byteOffset + accessor.byteOffset]);
                 const float *texture_coords = nullptr;
                 if (primitive.attributes.find("TEXCOORD_0") !=
                     primitive.attributes.end()) {
@@ -307,9 +327,22 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                                     uv_view.byteOffset]));
                 }
                 for (size_t i = 0; i < index_count; i += 3) {
-                    Vec3 v1 = make_vec3(&positions[index_buffer[i] * 3]);
-                    Vec3 v2 = make_vec3(&positions[index_buffer[i + 1] * 3]);
-                    Vec3 v3 = make_vec3(&positions[index_buffer[i + 2] * 3]);
+                    /* std::cout << "Index start: " << index_start << std::endl;
+                    std::cout << "Vertex start: " << vertex_start << std::endl;
+                    std::cout << "Index count: " << index_count << std::endl;
+                    std::cout << "Vertex count: " << vertex_count << std::endl; */
+                    Vec3 v1 = vertex_buffer[index_buffer[index_start + i]];
+                    Vec3 v2 = vertex_buffer[index_buffer[index_start + 1 + i]];
+                    Vec3 v3 = vertex_buffer[index_buffer[index_start + 2 + i]];
+                    /* std::cout << index_buffer[index_start + i] << " "
+                              << index_buffer[index_start + 1 + i] << " "
+                              << index_buffer[index_start + 2 + i] << ":" << std::endl;
+                    std::cout << v1.x << " " << v1.y << " " << v1.z
+                              << std::endl;
+                    std::cout << v2.x << " " << v2.y << " " << v2.z
+                              << std::endl;
+                    std::cout << v3.x << " " << v3.y << " " << v3.z
+                              << std::endl; */
                     Vec2 uv1;
                     Vec2 uv2;
                     Vec2 uv3;
