@@ -13,8 +13,11 @@
 #include <string>
 
 #include "./aabb.hpp"
+#include "./controls.hpp"
 #include "./load_model.hpp"
 #include "./use_opengl.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void process_input(GLFWwindow *window);
@@ -112,7 +115,7 @@ int main(int argc, char *argv[])
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
@@ -339,7 +342,12 @@ int main(int argc, char *argv[])
         // input
         // -----
         process_input(window);
-
+        // Compute the MVP matrix from keyboard and mouse input
+        computeMatricesFromInputs(window);
+        glm::mat4 ProjectionMatrix = getProjectionMatrix();
+        glm::mat4 ViewMatrix = getViewMatrix();
+        glm::mat4 ModelMatrix = glm::mat4(1.0);
+        glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
         // render
         // ------
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -382,6 +390,8 @@ int main(int argc, char *argv[])
         int triangle_count_location =
             glGetUniformLocation(shader_program, "triangle_count");
         glUniform1i(triangle_count_location, triangles.size());
+        int mvpLocation = glGetUniformLocation(shader_program, "MVP");
+        glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, &MVP[0][0]);
 
         // AABB
         int root_id_location = glGetUniformLocation(shader_program, "root_id");
