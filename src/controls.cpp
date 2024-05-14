@@ -72,6 +72,11 @@ void update_movement(GLFWwindow *window, int mode) {
     glm::vec3 right(-sin(yaw - glm::pi<float>() / 2.0f), 0,
                     -cos(yaw - glm::pi<float>() / 2.0f));
 
+    // Make the control key quadrouple the speed
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+        speed *= 4;
+    }
+
     // Move forward
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         position += direction * delta_time * speed;
@@ -95,6 +100,11 @@ void update_movement(GLFWwindow *window, int mode) {
     // Move down
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         position -= glm::vec3(0, 1, 0) * delta_time * speed;
+    }
+
+    // Reset speed
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+        speed /= 4;
     }
 
     // Zoom in/out with mouse wheel
