@@ -54,6 +54,7 @@ int main(int argc, char *argv[]) {
     std::string shader_path = argv[1];
     std::vector<TriangleForGLSL *> triangles;
     std::vector<tinygltf::Image> textures;
+    tinygltf::Image environment_texture;
 #ifdef DEBUG_PRINT
     auto start_model = std::chrono::high_resolution_clock::now();
 #endif
@@ -204,6 +205,7 @@ int main(int argc, char *argv[]) {
 #ifdef DEBUG_PRINT
     auto start_texture = std::chrono::high_resolution_clock::now();
 #endif
+
     if (textures.size() != 0) {
         float max_h;
 
@@ -225,6 +227,8 @@ int main(int argc, char *argv[]) {
             ratios.push_back(temp);
         }
         GLuint texture;
+        GLuint texture_env;
+
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
         glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA32F, max_h, max_w,
@@ -247,6 +251,7 @@ int main(int argc, char *argv[]) {
             temp.y = 1;
             ratios.push_back(temp);
         }
+        environment_texture = textures[0];
         GLuint tex_ratios;
         glGenBuffers(1, &tex_ratios);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, tex_ratios);
@@ -255,6 +260,12 @@ int main(int argc, char *argv[]) {
                      GL_DYNAMIC_COPY);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, tex_ratios);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        glGenTextures(1, &texture_env);
+        glBindTexture(GL_TEXTURE_2D, texture_env);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, environment_texture.width,
+                     environment_texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                     environment_texture.image.data());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     }
 
 #ifdef DEBUG_PRINT
