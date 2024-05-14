@@ -13,9 +13,11 @@ float initial_fov = 45.0f;
 
 float speed = 3.0f; // 3 units / second
 float mouse_speed = 0.005f;
+int renderMode = 0;
 
 glm::vec2 get_rotation() { return glm::vec2(pitch, yaw); }
 glm::vec3 get_position() { return position; }
+int get_render_mode() { return renderMode; }
 
 void update_movement(GLFWwindow *window, int mode) {
 
@@ -72,9 +74,11 @@ void update_movement(GLFWwindow *window, int mode) {
     glm::vec3 right(-sin(yaw - glm::pi<float>() / 2.0f), 0,
                     -cos(yaw - glm::pi<float>() / 2.0f));
 
-    // Make the control key quadrouple the speed
+    renderMode = 0;
+    // Make the control key quadrouple the speed and switch to fast render mode
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
         speed *= 4;
+        renderMode = 1;
     }
 
     // Move forward

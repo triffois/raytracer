@@ -426,6 +426,9 @@ int main(int argc, char *argv[]) {
         // AABB
         int root_id_location = glGetUniformLocation(shader_program, "root_id");
         glUniform1i(root_id_location, aabb->root_id);
+
+        int render_mode_location = glGetUniformLocation(shader_program, "fast_render");
+        glUniform1i(render_mode_location, get_render_mode());
     }
 
     // optional: de-allocate all resources once they've outlived their purpose:

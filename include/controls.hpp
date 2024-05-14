@@ -13,5 +13,6 @@ enum {
 void update_movement(GLFWwindow *window, int mode);
 glm::vec2 get_rotation();
 glm::vec3 get_position();
+int get_render_mode();
 
 #endif
