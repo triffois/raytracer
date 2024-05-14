@@ -63,8 +63,8 @@ int main(int argc, char *argv[]) {
     int mode = MODE_MOUSE;
     if (last_arg.find("mode=") != std::string::npos) {
         argc--;
-        last_arg = argv[argc - 1];
         std::string mode_arg = last_arg.substr(5);
+        last_arg = argv[argc - 1];
         if (mode_arg == "arrows") {
             mode = MODE_ARROWS;
         }
