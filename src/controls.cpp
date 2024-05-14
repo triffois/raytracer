@@ -5,107 +5,92 @@ using namespace glm;
 
 #include "./controls.hpp"
 
-glm::mat4 ViewMatrix;
-glm::mat4 ProjectionMatrix;
-
-glm::mat4 getViewMatrix() {
-    return ViewMatrix;
-}
-glm::mat4 getProjectionMatrix() {
-    return ProjectionMatrix;
-}
-
-// Initial position : on +Z
 glm::vec3 position = glm::vec3(0, 0, -5);
-// Initial horizontal angle : toward -Z
-float horizontalAngle = glm::pi<float>();
-// Initial vertical angle : none
-float verticalAngle = 0.0f;
-// Initial Field of View
+
+float yaw = glm::pi<float>();
+float pitch = 0.0f;
 float initialFoV = 45.0f;
 
 float speed = 3.0f; // 3 units / second
 float mouseSpeed = 0.005f;
 
-void computeMatricesFromInputs(GLFWwindow* window) {
+glm::vec2 getRotation() { return glm::vec2(pitch, yaw); }
+glm::vec3 getPosition() { return position; }
 
-    // Get window size
-    int width, height;
-    glfwGetWindowSize(window, &width, &height);
+void updateMovement(GLFWwindow *window) {
 
-    // glfwGetTime is called only once, the first time this function is called
-    static double lastTime = glfwGetTime();
+  // Get window size
+  int width, height;
+  glfwGetWindowSize(window, &width, &height);
 
-    // Compute time difference between current and last frame
-    double currentTime = glfwGetTime();
-    float deltaTime = float(currentTime - lastTime);
+  // glfwGetTime is called only once, the first time this function is called
+  static double lastTime = glfwGetTime();
 
-    // Get mouse position
-    double xpos, ypos;
-    glfwGetCursorPos(window, &xpos, &ypos);
+  // Compute time difference between current and last frame
+  double currentTime = glfwGetTime();
+  float deltaTime = float(currentTime - lastTime);
 
-    // Reset mouse position for next frame
-    glfwSetCursorPos(window, width / 2, height / 2);
+  // Get mouse position
+  double xpos, ypos;
+  glfwGetCursorPos(window, &xpos, &ypos);
 
-    // Compute new orientation
-    horizontalAngle += mouseSpeed * float(width / 2 - xpos);
-    verticalAngle += mouseSpeed * float(height / 2 - ypos);
+  // Reset mouse position for next frame
+  glfwSetCursorPos(window, width / 2.0, height / 2.0);
 
-    // Direction : Spherical coordinates to Cartesian coordinates conversion
-    glm::vec3 direction(
-        cos(verticalAngle) * sin(horizontalAngle),
-        sin(verticalAngle),
-        cos(verticalAngle) * cos(horizontalAngle)
-    );
+  // Compute new orientation
+  yaw += mouseSpeed * (width / 2.0 - xpos);
+  pitch += mouseSpeed * (height / 2.0 - ypos);
 
-    // Right vector
-    glm::vec3 right = glm::vec3(
-        sin(horizontalAngle - glm::pi<float>() / 2.0f),
-        0,
-        cos(horizontalAngle - glm::pi<float>() / 2.0f)
-    );
+  // Clamp pitch
+  if (pitch > glm::pi<float>() / 2.0f) {
+    pitch = glm::pi<float>() / 2.0f;
+  }
+  if (pitch < -glm::pi<float>() / 2.0f) {
+    pitch = -glm::pi<float>() / 2.0f;
+  }
 
-    // Up vector
-    glm::vec3 up = glm::cross(right, direction);
+  // Compute purely horizontal direction
+  glm::vec3 direction(-sin(yaw), 0, -cos(yaw));
+  glm::vec3 right(-sin(yaw - glm::pi<float>() / 2.0f), 0,
+                  -cos(yaw - glm::pi<float>() / 2.0f));
 
-    // Move forward
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        position += direction * deltaTime * speed;
-    }
-    // Move backward
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        position -= direction * deltaTime * speed;
-    }
-    // Strafe right
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        position += right * deltaTime * speed;
-    }
-    // Strafe left
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        position -= right * deltaTime * speed;
-    }
+  // Move forward
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    position += direction * deltaTime * speed;
+  }
+  // Move backward
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    position -= direction * deltaTime * speed;
+  }
+  // Strafe right
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    position += right * deltaTime * speed;
+  }
+  // Strafe left
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    position -= right * deltaTime * speed;
+  }
+  // Move up
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+    position += glm::vec3(0, 1, 0) * deltaTime * speed;
+  }
+  // Move down
+  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+    position -= glm::vec3(0, 1, 0) * deltaTime * speed;
+  }
 
-    // Zoom in/out with mouse wheel
-    double yoffset = 0;
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
-        double prevY;
-        glfwGetCursorPos(window, nullptr, &prevY);
-        glfwPollEvents();
-        double currY;
-        glfwGetCursorPos(window, nullptr, &currY);
-        yoffset = currY - prevY;
-    }
-    float FoV = initialFoV - 5 * static_cast<float>(yoffset);
+  // Zoom in/out with mouse wheel
+  double yoffset = 0;
+  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+    double prevY;
+    glfwGetCursorPos(window, nullptr, &prevY);
+    glfwPollEvents();
+    double currY;
+    glfwGetCursorPos(window, nullptr, &currY);
+    yoffset = currY - prevY;
+  }
+  float FoV = initialFoV - 5 * static_cast<float>(yoffset);
 
-    // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-    ProjectionMatrix = glm::perspective(glm::radians(FoV), static_cast<float>(width) / static_cast<float>(height), 0.1f, 100.0f);
-    // Camera matrix
-    ViewMatrix = glm::lookAt(
-        position,             // Camera is here
-        position + direction, // and looks here : at the same position, plus "direction"
-        up                    // Head is up (set to 0,-1,0 to look upside-down)
-    );
-
-    // For the next frame, the "last time" will be "now"
-    lastTime = currentTime;
+  // For the next frame, the "last time" will be "now"
+  lastTime = currentTime;
 }

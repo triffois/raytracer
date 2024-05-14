@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
         float max_h;
 
         float max_w;
-        std::vector<Vec2> ratios;
+        std::vector<Vec3ForGLSL> ratios;
         for (int i = 0; i < textures.size(); i++)
         {
             if (textures[i].height > max_h)
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
             }
         }
         float ratio = max_h / max_w;
-        Vec2 temp;
+        Vec3ForGLSL temp;
         for (int i = 0; i < textures.size(); i++)
         {
             temp.x = textures[i].width / max_w;
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
         GLuint tex_ratios;
         glGenBuffers(1, &tex_ratios);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, tex_ratios);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, ratios.size() * sizeof(Vec2),
+        glBufferData(GL_SHADER_STORAGE_BUFFER, ratios.size() * sizeof(Vec3ForGLSL),
                      ratios.data(), GL_DYNAMIC_COPY);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, tex_ratios);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -355,12 +355,10 @@ int main(int argc, char *argv[])
         // input
         // -----
         process_input(window);
+
         // Compute the MVP matrix from keyboard and mouse input
-        computeMatricesFromInputs(window);
-        glm::mat4 ProjectionMatrix = getProjectionMatrix();
-        glm::mat4 ViewMatrix = getViewMatrix();
-        glm::mat4 ModelMatrix = glm::mat4(1.0);
-        glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+        updateMovement(window);
+
         // render
         // ------
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -403,8 +401,12 @@ int main(int argc, char *argv[])
         int triangle_count_location =
             glGetUniformLocation(shader_program, "triangle_count");
         glUniform1i(triangle_count_location, triangles.size());
-        int mvpLocation = glGetUniformLocation(shader_program, "MVP");
-        glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, &MVP[0][0]);
+        int positionLocation = glGetUniformLocation(shader_program, "position");
+        glm::vec3 position = getPosition();
+        glUniform3f(positionLocation, position.x, position.y, position.z);
+        int rotationLocation = glGetUniformLocation(shader_program, "rotation");
+        glm::vec2 rotation = getRotation();
+        glUniform2f(rotationLocation, rotation.x, rotation.y);
 
         // AABB
         int root_id_location = glGetUniformLocation(shader_program, "root_id");
