@@ -1,8 +1,8 @@
-our report:
+### our report:
 https://www.overleaf.com/read/mzgnkhkjzgjw#ead516
 
 
-how to compile:
+### how to compile:
 
 bash compile.sh
 
@@ -17,7 +17,8 @@ cmake -DGLFW_BUILD_WAYLAND=OFF ..
 make
 
 
-sources:
+### sources:
+
 https://doi.org/10.1145/965141.563893
 
 https://doi.org/10.1080/10867651.1997.10487468
