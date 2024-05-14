@@ -52,6 +52,8 @@ struct Triangle {
     double roughness_factor;
     double alpha_cutoff;
     bool double_sided;
+    Vec3 emissive_factor;
+    Vec4 base_color_factor;
 };
 
 struct Vec2ForGLSL {
@@ -64,6 +66,13 @@ struct PaddedVec3ForGLSL {
     float y;
     float z;
     float padding;
+};
+
+struct Vec4ForGLSL {
+    float x;
+    float y;
+    float z;
+    float w;
 };
 
 struct TexturedVec4ForGLSL {
@@ -91,6 +100,9 @@ struct TriangleForGLSL {
     float roughness_factor;
     float alpha_cutoff;
     uint32_t double_sided;
+
+    PaddedVec3ForGLSL emissive_factor;
+    Vec4ForGLSL base_color_factor;
 };
 
 

@@ -266,8 +266,10 @@ void load_node(OurNode *parent, const tinygltf::Node &node,
                     //           << positions[i * 3 + 1] << ", "        // y
                     //           << positions[i * 3 + 2] << ")"         // z
                     //           << "\n";
-                    Vertex v = Vertex{positions[i * 3 + 0], positions[i * 3 + 1],
-                                  positions[i * 3 + 2], buffer_texture_coords[i * 2], buffer_texture_coords[i * 2 + 1]};
+                    Vertex v = Vertex{
+                        positions[i * 3 + 0], positions[i * 3 + 1],
+                        positions[i * 3 + 2], buffer_texture_coords[i * 2],
+                        buffer_texture_coords[i * 2 + 1]};
                     vertex_buffer.emplace_back(v);
                 }
             }
@@ -338,6 +340,8 @@ void load_node(OurNode *parent, const tinygltf::Node &node,
                     uint32_t texture_id = std::numeric_limits<uint32_t>::max();
                     uint32_t metallic_roughness_texture_id =
                         std::numeric_limits<uint32_t>::max();
+                    Vec3 emissive_factor = Vec3{0.0, 0.0, 0.0};
+                    Vec4 base_color_factor = Vec4{1.0, 1.0, 1.0, 1.0};
                     double metallic_factor = 0.5;
                     double roughness_factor = 0.5;
                     double alpha_cutoff = 0.5;
@@ -352,7 +356,12 @@ void load_node(OurNode *parent, const tinygltf::Node &node,
                                 model.materials[primitive.material]
                                     .pbrMetallicRoughness
                                     .metallicRoughnessTexture.index;
+                            base_color_factor = make_vec4(
+                                model.materials[primitive.material]
+                                    .pbrMetallicRoughness.baseColorFactor);
                         }
+                        emissive_factor = make_vec3(
+                            model.materials[primitive.material].emissiveFactor);
                         metallic_factor =
                             model.materials[primitive.material]
                                 .pbrMetallicRoughness.metallicFactor;
@@ -375,7 +384,9 @@ void load_node(OurNode *parent, const tinygltf::Node &node,
                                       metallic_factor,
                                       roughness_factor,
                                       alpha_cutoff,
-                                      double_sided};
+                                      double_sided,
+                                      emissive_factor,
+                                      base_color_factor};
                     new_node.primitives.emplace_back(triangle);
                 }
             }
@@ -460,7 +471,8 @@ PaddedVec3ForGLSL transform4(const Matrix4 &matrix, const Vec3 &vector3) {
         0};
 }
 
-PaddedVec3ForGLSL transform4(const Matrix4 &matrix, const PaddedVec3ForGLSL &vector) {
+PaddedVec3ForGLSL transform4(const Matrix4 &matrix,
+                             const PaddedVec3ForGLSL &vector) {
     return PaddedVec3ForGLSL{
         static_cast<float>(matrix.v1.x * vector.x + matrix.v1.y * vector.y +
                            matrix.v1.z * vector.z + matrix.v1.w * 1.0f),
@@ -471,26 +483,31 @@ PaddedVec3ForGLSL transform4(const Matrix4 &matrix, const PaddedVec3ForGLSL &vec
         0};
 }
 
-PaddedVec3ForGLSL v3_min(const PaddedVec3ForGLSL &v1, const PaddedVec3ForGLSL &v2,
-                   const PaddedVec3ForGLSL &v3) {
+PaddedVec3ForGLSL v3_min(const PaddedVec3ForGLSL &v1,
+                         const PaddedVec3ForGLSL &v2,
+                         const PaddedVec3ForGLSL &v3) {
     return PaddedVec3ForGLSL{std::min(v1.x, std::min(v2.x, v3.x)),
-                       std::min(v1.y, std::min(v2.y, v3.y)),
-                       std::min(v1.z, std::min(v2.z, v3.z)), 0};
+                             std::min(v1.y, std::min(v2.y, v3.y)),
+                             std::min(v1.z, std::min(v2.z, v3.z)), 0};
 }
 
-PaddedVec3ForGLSL v3_max(const PaddedVec3ForGLSL &v1, const PaddedVec3ForGLSL &v2,
-                   const PaddedVec3ForGLSL &v3) {
+PaddedVec3ForGLSL v3_max(const PaddedVec3ForGLSL &v1,
+                         const PaddedVec3ForGLSL &v2,
+                         const PaddedVec3ForGLSL &v3) {
     return PaddedVec3ForGLSL{std::max(v1.x, std::max(v2.x, v3.x)),
-                       std::max(v1.y, std::max(v2.y, v3.y)),
-                       std::max(v1.z, std::max(v2.z, v3.z)), 0};
+                             std::max(v1.y, std::max(v2.y, v3.y)),
+                             std::max(v1.z, std::max(v2.z, v3.z)), 0};
 }
 
 std::vector<TriangleForGLSL *> node_to_triangles(const OurNode &node) {
     std::vector<TriangleForGLSL *> triangles = {};
     for (const auto &primitive : node.primitives) {
-        PaddedVec3ForGLSL v1_transformed = transform4(node.matrix, primitive.v1);
-        PaddedVec3ForGLSL v2_transformed = transform4(node.matrix, primitive.v2);
-        PaddedVec3ForGLSL v3_transformed = transform4(node.matrix, primitive.v3);
+        PaddedVec3ForGLSL v1_transformed =
+            transform4(node.matrix, primitive.v1);
+        PaddedVec3ForGLSL v2_transformed =
+            transform4(node.matrix, primitive.v2);
+        PaddedVec3ForGLSL v3_transformed =
+            transform4(node.matrix, primitive.v3);
         PaddedVec3ForGLSL min_transformed =
             v3_min(v1_transformed, v2_transformed, v3_transformed);
         PaddedVec3ForGLSL max_transformed =
@@ -508,11 +525,20 @@ std::vector<TriangleForGLSL *> node_to_triangles(const OurNode &node) {
         float roughness_factor = static_cast<float>(primitive.roughness_factor);
         float alpha_cutoff = static_cast<float>(primitive.alpha_cutoff);
         uint32_t double_sided = static_cast<uint32_t>(primitive.double_sided);
+        PaddedVec3ForGLSL emissive_factor = PaddedVec3ForGLSL{
+            static_cast<float>(primitive.emissive_factor.x),
+            static_cast<float>(primitive.emissive_factor.y),
+            static_cast<float>(primitive.emissive_factor.z), 0.0f};
+        Vec4ForGLSL base_color_factor =
+            Vec4ForGLSL{static_cast<float>(primitive.base_color_factor.x),
+                        static_cast<float>(primitive.base_color_factor.y),
+                        static_cast<float>(primitive.base_color_factor.z),
+                        static_cast<float>(primitive.base_color_factor.w)};
         triangles.emplace_back(new TriangleForGLSL{
             v1_transformed, v2_transformed, v3_transformed, min_transformed,
             max_transformed, uv1, uv2, uv3, texture_id,
             metallic_roughness_texture_id, metallic_factor, roughness_factor,
-            alpha_cutoff, double_sided});
+            alpha_cutoff, double_sided, emissive_factor, base_color_factor});
     }
     for (const auto &child : node.children) {
         std::vector<TriangleForGLSL *> new_triangles = node_to_triangles(child);
