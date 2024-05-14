@@ -58,15 +58,27 @@ int main(int argc, char *argv[]) {
 #ifdef DEBUG_PRINT
     auto start_model = std::chrono::high_resolution_clock::now();
 #endif
+    std::string sky_path = "";
     std::string last_arg = argv[argc - 1];
     int mode = MODE_MOUSE;
     if (last_arg.find("mode=") != std::string::npos) {
         argc--;
+        last_arg = argv[argc - 1];
         std::string mode_arg = last_arg.substr(5);
         if (mode_arg == "arrows") {
             mode = MODE_ARROWS;
         }
+        if(last_arg.find("sky=") != std::string::npos) {
+            argc--;
+            sky_path = last_arg.substr(4);
+        }
     }
+    else if(last_arg.find("sky=") != std::string::npos) {
+        argc--;
+        sky_path = last_arg.substr(4);
+    }
+    
+
     for (int i = 2; i < argc; ++i) {
         std::string path = argv[i];
         OurNode model = load_model(path);
@@ -78,6 +90,11 @@ int main(int argc, char *argv[]) {
         for (size_t j = 0; j < model.images.size(); ++j) {
             textures.emplace_back(model.images[j]);
         }
+    }
+    OurNode sky_model;
+    if(sky_path!="") {
+        sky_model = load_model(sky_path);
+        environment_texture = sky_model.images[0];
     }
 #ifdef DEBUG_PRINT
     auto end_model = std::chrono::high_resolution_clock::now();
@@ -237,8 +254,6 @@ int main(int argc, char *argv[]) {
             glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, textures[i].width,
                             textures[i].height, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                             textures[i].image.data());
-            std::cout << "Texture " << i << " size: " << textures[i].width
-                      << "x" << textures[i].height << std::endl;
         }
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -251,7 +266,6 @@ int main(int argc, char *argv[]) {
             temp.y = 1;
             ratios.push_back(temp);
         }
-        environment_texture = textures[0];
         GLuint tex_ratios;
         glGenBuffers(1, &tex_ratios);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, tex_ratios);
@@ -260,12 +274,15 @@ int main(int argc, char *argv[]) {
                      GL_DYNAMIC_COPY);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, tex_ratios);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        if(sky_path!="") {
         glGenTextures(1, &texture_env);
         glBindTexture(GL_TEXTURE_2D, texture_env);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, environment_texture.width,
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, environment_texture.width,
                      environment_texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                      environment_texture.image.data());
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glTextureParameteri(texture_env, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    }
     }
 
 #ifdef DEBUG_PRINT
