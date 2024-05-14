@@ -121,10 +121,8 @@ void print_json_node(const OurNode &node);
 
 void print_node(const OurNode &node, size_t depth = 0);
 
-void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
-               const tinygltf::Model &model,
-               std::vector<uint32_t> &index_buffer,
-               std::vector<Vec3> &vertex_buffer, float global_scale);
+void load_node(OurNode *parent, const tinygltf::Node &node,
+               const tinygltf::Model &model, float global_scale);
 
 OurNode load_model(std::string filename);
 

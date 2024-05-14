@@ -181,10 +181,8 @@ uint32_t find_texture(const tinygltf::Texture *tex,
     return res;
 }
 
-void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
-               const tinygltf::Model &model,
-               std::vector<uint32_t> &index_buffer,
-               std::vector<Vertex> &vertex_buffer, float global_scale) {
+void load_node(OurNode *parent, const tinygltf::Node &node,
+               const tinygltf::Model &model, float global_scale) {
     auto new_node = OurNode{};
 
     // Generate local node matrix
@@ -211,8 +209,7 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
     // Node with children
     if (!node.children.empty()) {
         for (const auto &child : node.children) {
-            load_node(&new_node, model.nodes[child], child, model, index_buffer,
-                      vertex_buffer, global_scale);
+            load_node(&new_node, model.nodes[child], model, global_scale);
         }
     }
 
@@ -232,17 +229,14 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                 continue;
             }
             uint32_t index_count = 0;
-            uint32_t vertex_count = 0;
-            uint32_t vertex_start = static_cast<uint32_t>(vertex_buffer.size());
-            uint32_t index_start = static_cast<uint32_t>(index_buffer.size());
+
+            std::vector<Vertex> vertex_buffer = std::vector<Vertex>();
+            std::vector<uint32_t> index_buffer = std::vector<uint32_t>();
 
             const float *buffer_texture_coords;
             {
-                vertex_buffer = std::vector<Vertex>();
                 const tinygltf::Accessor &accessor =
                     model.accessors[primitive.attributes.at("POSITION")];
-
-                vertex_count = static_cast<uint32_t>(accessor.count);
 
                 const tinygltf::BufferView &buffer_view =
                     model.bufferViews[accessor.bufferView];
@@ -332,25 +326,12 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
             }
             {
                 for (size_t i = 0; i < index_count; i += 3) {
-                    /* std::cout << "Index start: " << index_start << std::endl;
-                    std::cout << "Vertex start: " << vertex_start << std::endl;
-                    std::cout << "Index count: " << index_count << std::endl;
-                    std::cout << "Vertex count: " << vertex_count << std::endl; */
-                    Vertex v1_with_uv = vertex_buffer[index_buffer[index_start + i]];
-                    Vertex v2_with_uv = vertex_buffer[index_buffer[index_start + 1 + i]];
-                    Vertex v3_with_uv = vertex_buffer[index_buffer[index_start + 2 + i]];
+                    Vertex v1_with_uv = vertex_buffer[index_buffer[i]];
+                    Vertex v2_with_uv = vertex_buffer[index_buffer[1 + i]];
+                    Vertex v3_with_uv = vertex_buffer[index_buffer[2 + i]];
                     Vec3 v1 = Vec3{v1_with_uv.x, v1_with_uv.y, v1_with_uv.z};
                     Vec3 v2 = Vec3{v2_with_uv.x, v2_with_uv.y, v2_with_uv.z};
                     Vec3 v3 = Vec3{v3_with_uv.x, v3_with_uv.y, v3_with_uv.z};
-                    /* std::cout << index_buffer[index_start + i] << " "
-                              << index_buffer[index_start + 1 + i] << " "
-                              << index_buffer[index_start + 2 + i] << ":" << std::endl;
-                    std::cout << v1.x << " " << v1.y << " " << v1.z
-                              << std::endl;
-                    std::cout << v2.x << " " << v2.y << " " << v2.z
-                              << std::endl;
-                    std::cout << v3.x << " " << v3.y << " " << v3.z
-                              << std::endl; */
                     Vec2 uv1 = Vec2{v1_with_uv.uv_x, v1_with_uv.uv_y};
                     Vec2 uv2 = Vec2{v2_with_uv.uv_x, v2_with_uv.uv_y};
                     Vec2 uv3 = Vec2{v3_with_uv.uv_x, v3_with_uv.uv_y};
@@ -442,8 +423,6 @@ OurNode load_model(std::string filename) {
         gltf_model
             .scenes[gltf_model.defaultScene > -1 ? gltf_model.defaultScene : 0];
 
-    std::vector<uint32_t> index_buffer;
-    std::vector<Vertex> vertex_buffer;
     float scale = 1.0f;
 
     root_node.translation = Vec3{0.0f, 0.0f, -0.0f};
@@ -454,8 +433,7 @@ OurNode load_model(std::string filename) {
 
     for (const auto &node_idx : scene.nodes) {
         const tinygltf::Node node = gltf_model.nodes[node_idx];
-        load_node(&root_node, node, node_idx, gltf_model, index_buffer,
-                  vertex_buffer, scale);
+        load_node(&root_node, node, gltf_model, scale);
     }
 
 #ifdef DEBUG_PRINT
