@@ -9,8 +9,11 @@ bash compile.sh
 or
 
 mkdir build
+
 cd build
+
 cmake -DGLFW_BUILD_WAYLAND=OFF ..
+
 make
 
 
