@@ -528,7 +528,7 @@ std::vector<TriangleForGLSL *> node_to_triangles(const OurNode &node) {
         PaddedVec3ForGLSL emissive_factor = PaddedVec3ForGLSL{
             static_cast<float>(primitive.emissive_factor.x),
             static_cast<float>(primitive.emissive_factor.y),
-            static_cast<float>(primitive.emissive_factor.z), 0.0f};
+            static_cast<float>(primitive.emissive_factor.z), 0};
         Vec4ForGLSL base_color_factor =
             Vec4ForGLSL{static_cast<float>(primitive.base_color_factor.x),
                         static_cast<float>(primitive.base_color_factor.y),
