@@ -184,7 +184,7 @@ uint32_t find_texture(const tinygltf::Texture *tex,
 void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                const tinygltf::Model &model,
                std::vector<uint32_t> &index_buffer,
-               std::vector<Vec3> &vertex_buffer, float global_scale) {
+               std::vector<Vec5> &vertex_buffer, float global_scale) {
     auto new_node = OurNode{};
 
     // Generate local node matrix
@@ -235,6 +235,8 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
             uint32_t vertex_count = 0;
             uint32_t vertex_start = static_cast<uint32_t>(vertex_buffer.size());
             uint32_t index_start = static_cast<uint32_t>(index_buffer.size());
+
+            const float *buffer_texture_coords;
             {
                 const tinygltf::Accessor &accessor =
                     model.accessors[primitive.attributes.at("POSITION")];
@@ -247,6 +249,21 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                     model.buffers[buffer_view.buffer];
                 const float *positions = reinterpret_cast<const float *>(
                     &buffer.data[buffer_view.byteOffset + accessor.byteOffset]);
+
+                buffer_texture_coords = nullptr;
+                if (primitive.attributes.find("TEXCOORD_0") !=
+                    primitive.attributes.end()) {
+                    const tinygltf::Accessor &uv_accessor =
+                        model.accessors[primitive.attributes.find("TEXCOORD_0")
+                                            ->second];
+                    const tinygltf::BufferView &uv_view =
+                        model.bufferViews[uv_accessor.bufferView];
+                    buffer_texture_coords = reinterpret_cast<const float *>(
+                        &(model.buffers[uv_view.buffer]
+                              .data[uv_accessor.byteOffset +
+                                    uv_view.byteOffset]));
+                }
+
                 for (size_t i = 0; i < accessor.count; ++i) {
                     // Positions are Vec3 components, so for each vec3 stride,
                     // offset for x, y, and z.
@@ -254,8 +271,8 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                     //           << positions[i * 3 + 1] << ", "        // y
                     //           << positions[i * 3 + 2] << ")"         // z
                     //           << "\n";
-                    Vec3 v = Vec3{positions[i * 3 + 0], positions[i * 3 + 1],
-                                  positions[i * 3 + 2]};
+                    Vec5 v = Vec5{positions[i * 3 + 0], positions[i * 3 + 1],
+                                  positions[i * 3 + 2], buffer_texture_coords[i * 2], buffer_texture_coords[i * 2 + 1]};
                     vertex_buffer.emplace_back(v);
                 }
             }
@@ -313,27 +330,17 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                 }
             }
             {
-                const float *texture_coords = nullptr;
-                if (primitive.attributes.find("TEXCOORD_0") !=
-                    primitive.attributes.end()) {
-                    const tinygltf::Accessor &uv_accessor =
-                        model.accessors[primitive.attributes.find("TEXCOORD_0")
-                                            ->second];
-                    const tinygltf::BufferView &uv_view =
-                        model.bufferViews[uv_accessor.bufferView];
-                    texture_coords = reinterpret_cast<const float *>(
-                        &(model.buffers[uv_view.buffer]
-                              .data[uv_accessor.byteOffset +
-                                    uv_view.byteOffset]));
-                }
                 for (size_t i = 0; i < index_count; i += 3) {
                     /* std::cout << "Index start: " << index_start << std::endl;
                     std::cout << "Vertex start: " << vertex_start << std::endl;
                     std::cout << "Index count: " << index_count << std::endl;
                     std::cout << "Vertex count: " << vertex_count << std::endl; */
-                    Vec3 v1 = vertex_buffer[index_buffer[index_start + i]];
-                    Vec3 v2 = vertex_buffer[index_buffer[index_start + 1 + i]];
-                    Vec3 v3 = vertex_buffer[index_buffer[index_start + 2 + i]];
+                    Vec5 v1_with_uv = vertex_buffer[index_buffer[index_start + i]];
+                    Vec5 v2_with_uv = vertex_buffer[index_buffer[index_start + 1 + i]];
+                    Vec5 v3_with_uv = vertex_buffer[index_buffer[index_start + 2 + i]];
+                    Vec3 v1 = Vec3{v1_with_uv.x, v1_with_uv.y, v1_with_uv.z};
+                    Vec3 v2 = Vec3{v2_with_uv.x, v2_with_uv.y, v2_with_uv.z};
+                    Vec3 v3 = Vec3{v3_with_uv.x, v3_with_uv.y, v3_with_uv.z};
                     /* std::cout << index_buffer[index_start + i] << " "
                               << index_buffer[index_start + 1 + i] << " "
                               << index_buffer[index_start + 2 + i] << ":" << std::endl;
@@ -343,9 +350,9 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                               << std::endl;
                     std::cout << v3.x << " " << v3.y << " " << v3.z
                               << std::endl; */
-                    Vec2 uv1;
-                    Vec2 uv2;
-                    Vec2 uv3;
+                    Vec2 uv1 = Vec2{v1_with_uv.w, v1_with_uv.u};
+                    Vec2 uv2 = Vec2{v2_with_uv.w, v2_with_uv.u};
+                    Vec2 uv3 = Vec2{v3_with_uv.w, v3_with_uv.u};
                     uint32_t texture_id = std::numeric_limits<uint32_t>::max();
                     uint32_t metallic_roughness_texture_id =
                         std::numeric_limits<uint32_t>::max();
@@ -355,16 +362,7 @@ void load_node(OurNode *parent, const tinygltf::Node &node, uint32_t node_index,
                     bool double_sided = true;
                     if (static_cast<size_t>(primitive.material) <
                         model.materials.size()) {
-                        if (texture_coords != nullptr) {
-                            uv1 = Vec2{texture_coords[index_buffer[i] * 2],
-                                       texture_coords[index_buffer[i] * 2 + 1]};
-                            uv2 = Vec2{
-                                texture_coords[index_buffer[i + 1] * 2],
-                                texture_coords[index_buffer[i + 1] * 2 + 1]};
-                            uv3 = Vec2{
-                                texture_coords[index_buffer[i + 2] * 2],
-                                texture_coords[index_buffer[i + 2] * 2 + 1],
-                            };
+                        if (buffer_texture_coords != nullptr) {
                             texture_id = model.materials[primitive.material]
                                              .pbrMetallicRoughness
                                              .baseColorTexture.index;
@@ -444,7 +442,7 @@ OurNode load_model(std::string filename) {
             .scenes[gltf_model.defaultScene > -1 ? gltf_model.defaultScene : 0];
 
     std::vector<uint32_t> index_buffer;
-    std::vector<Vec3> vertex_buffer;
+    std::vector<Vec5> vertex_buffer;
     float scale = 1.0f;
 
     root_node.translation = Vec3{0.0f, 0.0f, -0.0f};

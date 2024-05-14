@@ -24,6 +24,14 @@ struct Vec4 {
     double w;
 };
 
+struct Vec5 {
+    double x;
+    double y;
+    double z;
+    double w;
+    double u;
+};
+
 struct Matrix4 {
     Vec4 v1;
     Vec4 v2;
