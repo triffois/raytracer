@@ -24,12 +24,12 @@ struct Vec4 {
     double w;
 };
 
-struct Vec5 {
+struct Vertex {
     double x;
     double y;
     double z;
-    double w;
-    double u;
+    double uv_x;
+    double uv_y;
 };
 
 struct Matrix4 {
