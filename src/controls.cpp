@@ -1,12 +1,11 @@
 // Include GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
 using namespace glm;
 
 #include "./controls.hpp"
 
-glm::vec3 position = glm::vec3(0, 0, -5);
+glm::vec3 position = glm::vec3(0, 2, 0);
 
 float yaw = glm::pi<float>();
 float pitch = 0.0f;
