@@ -33,7 +33,6 @@ void update_movement(GLFWwindow *window, int mode) {
 
     switch (mode) {
     case MODE_MOUSE:
-        std::cout << "Mouse mode" << std::endl;
         // Get mouse position
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
