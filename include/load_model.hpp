@@ -59,14 +59,14 @@ struct Vec2ForGLSL {
     float y;
 };
 
-struct Vec3ForGLSL {
+struct PaddedVec3ForGLSL {
     float x;
     float y;
     float z;
     float padding;
 };
 
-struct StrangeVec4ForGLSL {
+struct TexturedVec4ForGLSL {
     float x;
     float y;
     float z;
@@ -74,11 +74,11 @@ struct StrangeVec4ForGLSL {
 };
 
 struct TriangleForGLSL {
-    Vec3ForGLSL v1;
-    Vec3ForGLSL v2;
-    Vec3ForGLSL v3;
-    Vec3ForGLSL min;
-    Vec3ForGLSL max;
+    PaddedVec3ForGLSL v1;
+    PaddedVec3ForGLSL v2;
+    PaddedVec3ForGLSL v3;
+    PaddedVec3ForGLSL min;
+    PaddedVec3ForGLSL max;
 
     Vec2ForGLSL uv1;
     Vec2ForGLSL uv2;

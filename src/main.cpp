@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
         float max_h;
 
         float max_w;
-        std::vector<Vec3ForGLSL> ratios;
+        std::vector<PaddedVec3ForGLSL> ratios;
         for (int i = 0; i < textures.size(); i++)
         {
             if (textures[i].height > max_h)
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
             }
         }
         float ratio = max_h / max_w;
-        Vec3ForGLSL temp;
+        PaddedVec3ForGLSL temp;
         for (int i = 0; i < textures.size(); i++)
         {
             temp.x = textures[i].width / max_w;
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
         GLuint tex_ratios;
         glGenBuffers(1, &tex_ratios);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, tex_ratios);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, ratios.size() * sizeof(Vec3ForGLSL),
+        glBufferData(GL_SHADER_STORAGE_BUFFER, ratios.size() * sizeof(PaddedVec3ForGLSL),
                      ratios.data(), GL_DYNAMIC_COPY);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, tex_ratios);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);

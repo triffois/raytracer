@@ -5,26 +5,26 @@
 #include <limits>
 #include <vector>
 
-Vec3ForGLSL get_min(const std::vector<TriangleForGLSL *> &triangles, int start,
+PaddedVec3ForGLSL get_min(const std::vector<TriangleForGLSL *> &triangles, int start,
                     int end) {
-    Vec3ForGLSL min = Vec3ForGLSL{std::numeric_limits<float>::max(),
+    PaddedVec3ForGLSL min = PaddedVec3ForGLSL{std::numeric_limits<float>::max(),
                                   std::numeric_limits<float>::max(),
                                   std::numeric_limits<float>::max(), 0};
     for (int i = start; i < end; i++) {
-        min = Vec3ForGLSL{std::min(min.x, triangles[i]->min.x),
+        min = PaddedVec3ForGLSL{std::min(min.x, triangles[i]->min.x),
                           std::min(min.y, triangles[i]->min.y),
                           std::min(min.z, triangles[i]->min.z), 0};
     }
     return min;
 }
 
-Vec3ForGLSL get_max(const std::vector<TriangleForGLSL *> &triangles, int start,
+PaddedVec3ForGLSL get_max(const std::vector<TriangleForGLSL *> &triangles, int start,
                     int end) {
-    Vec3ForGLSL max = Vec3ForGLSL{-std::numeric_limits<float>::max(),
+    PaddedVec3ForGLSL max = PaddedVec3ForGLSL{-std::numeric_limits<float>::max(),
                                   -std::numeric_limits<float>::max(),
                                   -std::numeric_limits<float>::max(), 0};
     for (int i = start; i < end; i++) {
-        max = Vec3ForGLSL{std::max(max.x, triangles[i]->max.x),
+        max = PaddedVec3ForGLSL{std::max(max.x, triangles[i]->max.x),
                           std::max(max.y, triangles[i]->max.y),
                           std::max(max.z, triangles[i]->max.z), 0};
     }
@@ -33,7 +33,7 @@ Vec3ForGLSL get_max(const std::vector<TriangleForGLSL *> &triangles, int start,
 
 int get_next_coord(int coord) { return (coord + 1) % 3; }
 
-float get_coord(int coord, const Vec3ForGLSL &v) {
+float get_coord(int coord, const PaddedVec3ForGLSL &v) {
     if (coord == 0) {
         return v.x;
     } else if (coord == 1) {
@@ -68,10 +68,10 @@ Box triangles_to_box(std::vector<Box> &boxes,
         triangles_to_box(boxes, triangles, mid, end, get_next_coord(coord)));
     int right = boxes.size() - 1;
 
-    return Box(Vec3ForGLSL{std::min(boxes[left].min.x, boxes[right].min.x),
+    return Box(PaddedVec3ForGLSL{std::min(boxes[left].min.x, boxes[right].min.x),
                            std::min(boxes[left].min.y, boxes[right].min.y),
                            std::min(boxes[left].min.z, boxes[right].min.z), 0},
-               Vec3ForGLSL{std::max(boxes[left].max.x, boxes[right].max.x),
+               PaddedVec3ForGLSL{std::max(boxes[left].max.x, boxes[right].max.x),
                            std::max(boxes[left].max.y, boxes[right].max.y),
                            std::max(boxes[left].max.z, boxes[right].max.z), 0},
                left, right, start, end);
@@ -83,8 +83,8 @@ AABB *triangles_to_aabb(std::vector<Box> &boxes,
     int span = end - start;
 
     if (span <= 8) {
-        Vec3ForGLSL min = get_min(triangles, start, end);
-        Vec3ForGLSL max = get_max(triangles, start, end);
+        PaddedVec3ForGLSL min = get_min(triangles, start, end);
+        PaddedVec3ForGLSL max = get_max(triangles, start, end);
         boxes.emplace_back(Box(min, max, -1, -1, start, end));
         return new AABB{static_cast<int>(boxes.size() - 1)};
     }

@@ -470,8 +470,8 @@ Vec3 add_vec3(const Vec3 &vec1, const Vec3 &vec2) {
     return Vec3{vec1.x + vec2.x, vec1.y + vec2.y, vec1.z + vec2.z};
 }
 
-Vec3ForGLSL transform4(const Matrix4 &matrix, const Vec3 &vector3) {
-    return Vec3ForGLSL{
+PaddedVec3ForGLSL transform4(const Matrix4 &matrix, const Vec3 &vector3) {
+    return PaddedVec3ForGLSL{
         static_cast<float>(matrix.v1.x * vector3.x + matrix.v1.y * vector3.y +
                            matrix.v1.z * vector3.z + matrix.v1.w * 1.0f),
         static_cast<float>(matrix.v2.x * vector3.x + matrix.v2.y * vector3.y +
@@ -481,8 +481,8 @@ Vec3ForGLSL transform4(const Matrix4 &matrix, const Vec3 &vector3) {
         0};
 }
 
-Vec3ForGLSL transform4(const Matrix4 &matrix, const Vec3ForGLSL &vector) {
-    return Vec3ForGLSL{
+PaddedVec3ForGLSL transform4(const Matrix4 &matrix, const PaddedVec3ForGLSL &vector) {
+    return PaddedVec3ForGLSL{
         static_cast<float>(matrix.v1.x * vector.x + matrix.v1.y * vector.y +
                            matrix.v1.z * vector.z + matrix.v1.w * 1.0f),
         static_cast<float>(matrix.v2.x * vector.x + matrix.v2.y * vector.y +
@@ -492,16 +492,16 @@ Vec3ForGLSL transform4(const Matrix4 &matrix, const Vec3ForGLSL &vector) {
         0};
 }
 
-Vec3ForGLSL v3_min(const Vec3ForGLSL &v1, const Vec3ForGLSL &v2,
-                   const Vec3ForGLSL &v3) {
-    return Vec3ForGLSL{std::min(v1.x, std::min(v2.x, v3.x)),
+PaddedVec3ForGLSL v3_min(const PaddedVec3ForGLSL &v1, const PaddedVec3ForGLSL &v2,
+                   const PaddedVec3ForGLSL &v3) {
+    return PaddedVec3ForGLSL{std::min(v1.x, std::min(v2.x, v3.x)),
                        std::min(v1.y, std::min(v2.y, v3.y)),
                        std::min(v1.z, std::min(v2.z, v3.z)), 0};
 }
 
-Vec3ForGLSL v3_max(const Vec3ForGLSL &v1, const Vec3ForGLSL &v2,
-                   const Vec3ForGLSL &v3) {
-    return Vec3ForGLSL{std::max(v1.x, std::max(v2.x, v3.x)),
+PaddedVec3ForGLSL v3_max(const PaddedVec3ForGLSL &v1, const PaddedVec3ForGLSL &v2,
+                   const PaddedVec3ForGLSL &v3) {
+    return PaddedVec3ForGLSL{std::max(v1.x, std::max(v2.x, v3.x)),
                        std::max(v1.y, std::max(v2.y, v3.y)),
                        std::max(v1.z, std::max(v2.z, v3.z)), 0};
 }
@@ -509,12 +509,12 @@ Vec3ForGLSL v3_max(const Vec3ForGLSL &v1, const Vec3ForGLSL &v2,
 std::vector<TriangleForGLSL *> node_to_triangles(const OurNode &node) {
     std::vector<TriangleForGLSL *> triangles = {};
     for (const auto &primitive : node.primitives) {
-        Vec3ForGLSL v1_transformed = transform4(node.matrix, primitive.v1);
-        Vec3ForGLSL v2_transformed = transform4(node.matrix, primitive.v2);
-        Vec3ForGLSL v3_transformed = transform4(node.matrix, primitive.v3);
-        Vec3ForGLSL min_transformed =
+        PaddedVec3ForGLSL v1_transformed = transform4(node.matrix, primitive.v1);
+        PaddedVec3ForGLSL v2_transformed = transform4(node.matrix, primitive.v2);
+        PaddedVec3ForGLSL v3_transformed = transform4(node.matrix, primitive.v3);
+        PaddedVec3ForGLSL min_transformed =
             v3_min(v1_transformed, v2_transformed, v3_transformed);
-        Vec3ForGLSL max_transformed =
+        PaddedVec3ForGLSL max_transformed =
             v3_max(v1_transformed, v2_transformed, v3_transformed);
         Vec2ForGLSL uv1 = Vec2ForGLSL{static_cast<float>(primitive.uv1.x),
                                       static_cast<float>(primitive.uv1.y)};

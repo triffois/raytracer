@@ -3,12 +3,12 @@
 #include <vector>
 
 struct Box {
-    Box(Vec3ForGLSL min, Vec3ForGLSL max, int left_id, int right_id, int start,
+    Box(PaddedVec3ForGLSL min, PaddedVec3ForGLSL max, int left_id, int right_id, int start,
         int end)
         : min(min), max(max), left_id(left_id), right_id(right_id),
           start(start), end(end) {}
-    Vec3ForGLSL min;
-    Vec3ForGLSL max;
+    PaddedVec3ForGLSL min;
+    PaddedVec3ForGLSL max;
     int left_id;
     int right_id;
     int start;
@@ -23,7 +23,7 @@ void print_triangle(const Triangle &t);
 
 int get_next_coord(int coord);
 
-float get_coord(int coord, const Vec3ForGLSL &v);
+float get_coord(int coord, const PaddedVec3ForGLSL &v);
 
 Box triangles_to_box(std::vector<Box> &boxes,
                      std::vector<TriangleForGLSL *> &triangles, int start,
