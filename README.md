@@ -92,7 +92,7 @@ Note: our raytracer only supports models with triangles as primitives. Therefore
 ## To load multiple models
 
 ```bash
-./bin/MYOWNRAYTRACER <path_to_shader_file> <path_to_gtlf_file1> <path_to_gtb_file1> <path_to_gtlf_file2> <path_to_gtlf_file3> ...
+./bin/MYOWNRAYTRACER <path_to_shader_file> <path_to_gtlf_file1> <path_to_glb_file1> <path_to_gtlf_file2> <path_to_gtlf_file3> ...
 ```
 
 ## To specify camera rotation style
