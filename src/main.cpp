@@ -23,8 +23,8 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void process_input(GLFWwindow *window);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 500;
+const unsigned int SCR_HEIGHT = 500;
 
 const char *vertex_shader_source =
     "#version 330 core\n"
@@ -155,6 +155,10 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     glfwMakeContextCurrent(window);
+
+    // Disable vsync
+    glfwSwapInterval(0);
+
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // glad: load all OpenGL function pointers
